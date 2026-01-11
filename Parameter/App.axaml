@@ -1,0 +1,31 @@
+<Application xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:conv="using:Myth.Avalonia.Controls.Converters"
+			 xmlns:themes="using:Myth.Avalonia.Themes"
+			 x:Class="Parameter.App"
+			 RequestedThemeVariant="Dark">
+	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+	<Application.Styles>
+		<FluentTheme />
+
+		<themes:MythControls />
+		<themes:MythStyles />
+
+		<StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+
+	</Application.Styles>
+
+	<Application.Resources>
+		<ResourceDictionary>
+
+			<conv:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
+			<conv:EnumEqualsConverter x:Key="EnumEqualsConverter" />
+			<conv:EnumNotEqualsConverter x:Key="EnumNotEqualsConverter" />
+
+			<FontFamily x:Key="Phosphor">avares://Parameter/Assets/Fonts#Phosphor</FontFamily>
+			<FontFamily x:Key="PhosphorFill">avares://Parameter/Assets/Fonts#Phosphor-Fill</FontFamily>
+
+		</ResourceDictionary>
+	</Application.Resources>
+</Application>

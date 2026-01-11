@@ -1,0 +1,268 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:Parameter.ViewModels"
+			 xmlns:enum="using:Parameter.Enums"
+			 xmlns:i="using:Avalonia.Xaml.Interactivity"
+			 xmlns:bh="using:Myth.Avalonia.Controls.Behaviors"
+			 xmlns:amazon="using:Amazon"
+			 mc:Ignorable="d"
+			 d:DesignWidth="400" d:DesignHeight="450"
+			 x:Class="Parameter.Views.MainView"
+			 x:DataType="vm:MainViewModel">
+	<Design.DataContext>
+		<vm:MainViewModel />
+	</Design.DataContext>
+
+	<UserControl.Styles>
+		<Style Selector=":is(AutoCompleteBox)#RegionBox.custom-credentials-selected">
+			<Setter Property="HorizontalAlignment" Value="Stretch"/>
+			<Setter Property="Grid.Column" Value="2"/>
+			<Setter Property="Grid.ColumnSpan" Value="3"/>
+		</Style>
+
+		<Style Selector=":is(AutoCompleteBox)#RegionBox">
+			<Setter Property="Grid.Column" Value="4"/>
+		</Style>
+	</UserControl.Styles>
+
+	<Border Padding="8">
+
+		<Grid RowDefinitions="Auto, 10, Auto, 10, Auto, 10, Auto, 10, *">
+
+			<Expander Grid.Row="0" HorizontalAlignment="Stretch"
+					  IsExpanded="True">
+				<Expander.Header>
+					<TextBlock Text="AWS Credentials"
+							   FontSize="16"
+							   FontWeight="Bold"/>
+				</Expander.Header>
+
+				<Expander.Content>
+					<StackPanel Grid.Row="0"
+								Spacing="10">
+
+						<ComboBox ItemsSource="{Binding AwsCredentialsStorageLocations}"
+								  SelectedItem="{Binding SelectedAwsCredentialsLocation}"
+								  HorizontalAlignment="Stretch">
+							<ComboBox.ItemTemplate>
+								<DataTemplate>
+									<TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
+								</DataTemplate>
+							</ComboBox.ItemTemplate>
+						</ComboBox>
+
+						<Grid ColumnDefinitions="*,10,Auto"
+							  IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.SharedCredentialsFile}}">
+
+							<TextBox Grid.Row="2"
+									 Grid.Column="0"
+									 Watermark="Path to the AWS credentials"
+									 IsReadOnly="True"
+									 Focusable="False"
+									 Text="{Binding CredentialsFilePath}" />
+
+							<Button Grid.Row="2"
+									Grid.Column="2"
+									Classes="content-center no-padding"
+									Height="{Binding $parent.Bounds.Height}"
+									Width="{Binding $self.Height}">
+								<TextBlock Text="&#xE1FE;"
+										   FontSize="16"
+										   FontFamily="{ StaticResource Phosphor }"/>
+							</Button>
+						</Grid>
+
+						<StackPanel Spacing="5"
+									IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
+							<TextBox Text="{Binding CustomAccessKey}"
+									 Watermark="Access Key"/>
+
+							<TextBox Text="{Binding CustomSecretKey}"
+									 Watermark="Secret Key" PasswordChar="•" />
+						</StackPanel>
+					</StackPanel>
+				</Expander.Content>
+
+				<Expander.Styles>
+					<Style Selector=":is(Control).selected">
+						<Setter Property="IsVisible" Value="True"/>
+					</Style>
+				</Expander.Styles>
+			</Expander>
+
+			<Grid Grid.Row="2"
+				  ColumnDefinitions="Auto,5,*,5,120"
+				  x:Name="ProfileRegionPanel">
+
+				<ComboBox Grid.Column="0"
+						  Grid.ColumnSpan="3"
+						  HorizontalAlignment="Stretch"
+						  ItemsSource="{Binding Profiles}"
+						  SelectedItem="{Binding SelectedProfile}"
+						  IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumNotEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
+
+				<TextBlock Grid.Column="0"
+						   x:Name="RegionTextBlock"
+						   Text="Region"
+						   VerticalAlignment="Center"
+						   Foreground="Gray"
+						   FontSize="14"
+						   IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
+
+				<AutoCompleteBox x:DataType="vm:MainViewModel"
+								 x:Name="RegionBox"
+								 ItemsSource="{Binding Regions}"
+								 SelectedItem="{Binding SelectedRegion}"
+								 ValueMemberBinding="{Binding SystemName}"
+								 FilterMode="Contains"
+								 Watermark="Region"
+								 MinimumPrefixLength="0"
+								 AutoCompleteBoxProperties.ShowDropdownButton="True"
+								 AutoCompleteBoxProperties.DropdownButtonPosition="Right"
+								 Classes.custom-credentials-selected="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
+
+					<i:Interaction.Behaviors>
+						<bh:AutoCompleteDropdownButtonBehavior/>
+						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
+						<bh:AutoCompleteResetCaretPositionBehavior/>
+						<!--<bh:AutoCompletePreserveCaretPositionBehavior/>-->
+					</i:Interaction.Behaviors>
+
+					<AutoCompleteBox.Styles>
+						<Style Selector="AutoCompleteBox#PrefixBox /template/ Popup#PART_Popup">
+							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
+						</Style>
+						<Style Selector="AutoCompleteBox /template/ ListBox /template/ ListBoxItem">
+							<Setter Property="Focusable" Value="False"/>
+						</Style>
+					</AutoCompleteBox.Styles>
+
+				</AutoCompleteBox>
+
+			</Grid>
+
+			<Grid Grid.Row="4"
+				  ColumnDefinitions="Auto,5,*">
+
+				<TextBlock Grid.Column="0"
+						   Text="Search in"
+						   VerticalAlignment="Center"
+						   Foreground="Gray"
+						   FontSize="14"/>
+
+				<ComboBox Grid.Column="2"
+						  x:Name="SearchInComboBox"
+						  HorizontalAlignment="Stretch"
+						  ItemsSource="{Binding SearchSources}"
+						  SelectedItem="{Binding SelectedSearchSource}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+			</Grid>
+
+			<Grid Grid.Row="6"
+				  ColumnDefinitions="Auto,5,*,5,Auto">
+
+				<!-- <AutoCompleteBox Grid.Column="0"
+				Watermark="Prefix"/> -->
+
+				<AutoCompleteBox Grid.Column="0"
+								 x:DataType="vm:MainViewModel"
+								 x:Name="PrefixBox"
+								 ItemsSource="{Binding Products}"
+								 SelectedItem="{Binding SelectedProduct}"
+								 ValueMemberBinding="{Binding Name}"
+								 FilterMode="Contains"
+								 Watermark="Prefix"
+								 MinimumPrefixLength="0">
+
+					<i:Interaction.Behaviors>
+						<bh:AutoCompletePreserveCaretPositionBehavior/>
+						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
+					</i:Interaction.Behaviors>
+
+					<AutoCompleteBox.Styles>
+						<Style Selector="AutoCompleteBox#PrefixBox /template/ Popup#PART_Popup">
+							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
+						</Style>
+						<Style Selector="AutoCompleteBox /template/ ListBox /template/ ListBoxItem">
+							<Setter Property="Focusable" Value="False"/>
+						</Style>
+					</AutoCompleteBox.Styles>
+
+				</AutoCompleteBox>
+
+				<!-- <ComboBox ItemsSource="{Binding Products}"
+				SelectedItem="{Binding SelectedProduct}"
+				DisplayMemberBinding="{Binding Name}"
+				IsEditable="True"/> -->
+
+				<AutoCompleteBox Grid.Column="2"
+								 x:DataType="vm:MainViewModel"
+								 x:Name="ParameterBox"
+								 ItemsSource="{Binding ParameterHistory}"
+								 Text="{Binding ParameterText}"
+								 FilterMode="Contains"
+								 Watermark="Parameter name"
+								 IsTextCompletionEnabled="False"
+								 MinimumPrefixLength="0">
+
+					<i:Interaction.Behaviors>
+
+
+						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
+
+						<!-- Enter / подтверждение текста -->
+						<EventTriggerBehavior EventName="KeyDown">
+							<InvokeCommandAction
+							Command="{Binding OnKeyDown}"
+							PassEventArgsToCommand="True" />
+						</EventTriggerBehavior>
+
+						<EventTriggerBehavior EventName="LostFocus">
+							<InvokeCommandAction
+							Command="{Binding AddToHistory}"
+							CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
+						</EventTriggerBehavior>
+
+					</i:Interaction.Behaviors>
+
+					<AutoCompleteBox.Styles>
+						<Style Selector="AutoCompleteBox#ParameterBox /template/ Popup#PART_Popup">
+							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
+						</Style>
+					</AutoCompleteBox.Styles>
+
+				</AutoCompleteBox>
+
+				<Button Grid.Column="4"
+						Command="{Binding SearchParameter}"
+						Classes="content-center no-padding"
+						Height="{Binding $parent.Bounds.Height}"
+						Width="{Binding $self.Height}">
+					<TextBlock Text="&#xE30C;"
+							   FontSize="16"
+							   FontFamily="{ StaticResource Phosphor }"/>
+				</Button>
+			</Grid>
+
+			<Border Grid.Row="10"
+					CornerRadius="10"
+					ClipToBounds="True">
+				<DataGrid ItemsSource="{Binding People}"
+						  AutoGenerateColumns="True" IsReadOnly="True"
+						  GridLinesVisibility="All"
+						  >
+				</DataGrid>
+			</Border>
+
+		</Grid>
+	</Border>
+
+
+</UserControl>
