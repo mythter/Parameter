@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Amazon;
@@ -198,11 +199,13 @@ public partial class MainViewModel : ViewModelBase
 		}
 	}
 
-	[RelayCommand]
-	private async Task SearchParameter()
+	[RelayCommand(IncludeCancelCommand = true)]
+	private async Task SearchParameter(CancellationToken cancellationToken)
 	{
 		if (!await CanSearchParameter())
 			return;
+
+		Parameters.Clear();
 
 		var creds = GetAwsProfileCredentials(SelectedAwsCredentialsLocation);
 
@@ -210,22 +213,28 @@ public partial class MainViewModel : ViewModelBase
 
 		List<ParameterModel> parameters;
 
-		if (SelectedSearchSource == SearchSource.SSMParameterStore)
+		try
 		{
-			parameters = await GetSsmParameters(parameterPath, creds!);
+			if (SelectedSearchSource == SearchSource.SSMParameterStore)
+			{
+				parameters = await GetSsmParameters(parameterPath, creds!, cancellationToken: cancellationToken);
+			}
+			else if (SelectedSearchSource == SearchSource.SecretsManager)
+			{
+				parameters = await GetSecrets(parameterPath, creds!, cancellationToken: cancellationToken);
+			}
+			else // Everywhere
+			{
+				parameters = await GetSsmParameters(parameterPath, creds!, showErrorMessage: false, cancellationToken);
+				var secrets = await GetSecrets(parameterPath, creds!, showErrorMessage: false, cancellationToken);
+				parameters.AddRange(secrets);
+			}
 		}
-		else if (SelectedSearchSource == SearchSource.SecretsManager)
+		catch (OperationCanceledException)
 		{
-			parameters = await GetSecrets(parameterPath, creds!);
+			// ignore
+			return;
 		}
-		else // Everywhere
-		{
-			parameters = await GetSsmParameters(parameterPath, creds!);
-			var secrets = await GetSecrets(parameterPath, creds!);
-			parameters.AddRange(secrets);
-		}
-
-		Parameters.Clear();
 
 		foreach (var p in parameters)
 		{
@@ -277,8 +286,13 @@ public partial class MainViewModel : ViewModelBase
 		return textBlock?.Text ?? string.Empty;
 	}
 
-	private async Task<List<ParameterModel>> GetSsmParameters(string parameterPath, AWSCredentials creds)
+	private async Task<List<ParameterModel>> GetSsmParameters(string parameterPath, AWSCredentials creds, bool showErrorMessage = true, CancellationToken cancellationToken = default)
 	{
+		Task ShowErrorMessage(string message, string? title = null)
+			=> showErrorMessage
+				? _dialogService.ShowErrorAsync(message, title)
+				: Task.CompletedTask;
+
 		var ssm = _parameterServiceFactory.CreateSsmService(creds, SelectedRegion!);
 
 		// this is a requirement for SSM parameter
@@ -289,57 +303,62 @@ public partial class MainViewModel : ViewModelBase
 
 		try
 		{
-			var paramsByPath = await ssm.GetParameterByPathAsync(parameterPath);
+			var paramsByPath = await ssm.GetParameterByPathAsync(parameterPath, cancellationToken: cancellationToken);
 
 			if (paramsByPath.Count == 0)
 			{
-				paramsByPath.Add(await ssm.GetParameterAsync(parameterPath));
+				paramsByPath.Add(await ssm.GetParameterAsync(parameterPath, cancellationToken: cancellationToken));
 			}
 
 			return paramsByPath;
 		}
 		catch (ParameterNotFoundException)
 		{
-			await _dialogService.ShowErrorAsync($"Parameter {parameterPath} not found", $"Parameter not found");
+			await ShowErrorMessage($"Parameter {parameterPath} not found", $"Parameter not found");
 		}
 		catch (AmazonSimpleSystemsManagementException ex) when (ex.Message.Contains("security token"))
 		{
-			await _dialogService.ShowErrorAsync($"The credentials are invalid or you have selected the wrong region", $"Invalid Credentials");
+			await ShowErrorMessage($"The credentials are invalid or you have selected the wrong region", $"Invalid Credentials");
 		}
 		catch (AmazonSimpleSystemsManagementException ex)
 		{
-			await _dialogService.ShowErrorAsync(ex.Message);
+			await ShowErrorMessage(ex.Message);
 		}
 
 		return [];
 	}
 
-	private async Task<List<ParameterModel>> GetSecrets(string secretPath, AWSCredentials creds)
+	private async Task<List<ParameterModel>> GetSecrets(string secretPath, AWSCredentials creds, bool showErrorMessage = true, CancellationToken cancellationToken = default)
 	{
+		Task ShowErrorMessage(string message, string? title = null)
+			=> showErrorMessage
+				? _dialogService.ShowErrorAsync(message, title)
+				: Task.CompletedTask;
+
 		var secrets = _parameterServiceFactory.CreateSecretsService(creds, SelectedRegion!);
 
 		try
 		{
-			var secretsByPath = await secrets.GetSecretsByPrefixAsync(secretPath);
+			var secretsByPath = await secrets.GetSecretsByPrefixAsync(secretPath, cancellationToken);
 
 			if (secretsByPath.Count == 0)
 			{
-				secretsByPath.Add(await secrets.GetSecretAsync(secretPath));
+				secretsByPath.Add(await secrets.GetSecretAsync(secretPath, cancellationToken));
 			}
 
 			return secretsByPath;
 		}
 		catch (ResourceNotFoundException)
 		{
-			await _dialogService.ShowErrorAsync($"Secret {secretPath} not found", $"Secret not found");
+			await ShowErrorMessage($"Secret {secretPath} not found", $"Secret not found");
 		}
 		catch (AmazonSecretsManagerException ex) when (ex.Message.Contains("security token"))
 		{
-			await _dialogService.ShowErrorAsync($"The credentials are invalid or you have selected the wrong region", $"Invalid Credentials");
+			await ShowErrorMessage($"The credentials are invalid or you have selected the wrong region", $"Invalid Credentials");
 		}
 		catch (AmazonSecretsManagerException ex)
 		{
-			await _dialogService.ShowErrorAsync(ex.Message);
+			await ShowErrorMessage(ex.Message);
 		}
 
 		return [];

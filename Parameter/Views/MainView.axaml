@@ -263,11 +263,23 @@
 				<!-- Search Button -->
 				<Button Grid.Column="4"
 						Command="{Binding SearchParameterCommand}"
+						IsVisible="{Binding !SearchParameterCommand.IsRunning}"
 						Classes="square content-center no-padding">
 					<TextBlock Text="&#xE30C;"
 							   FontSize="16"
 							   FontFamily="{ StaticResource Phosphor }"/>
 				</Button>
+
+				<!-- Cancel Search Button -->
+				<Button Grid.Column="4"
+						Command="{Binding SearchParameterCancelCommand}"
+						IsVisible="{Binding SearchParameterCommand.IsRunning}"
+						Classes="square content-center no-padding">
+					<TextBlock Text="&#xE4F6;"
+							   FontSize="16"
+							   FontFamily="{ StaticResource Phosphor }"/>
+				</Button>
+
 			</Grid>
 
 			<Border Grid.Row="10"

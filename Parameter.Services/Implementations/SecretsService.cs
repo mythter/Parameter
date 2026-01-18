@@ -15,13 +15,14 @@ namespace Parameter.Services.Implementations
 	{
 		private readonly AmazonSecretsManagerClient _secrets = new(creds, region);
 
-		public async Task<ParameterModel> GetSecretAsync(string secretName)
+		public async Task<ParameterModel> GetSecretAsync(string secretName, CancellationToken cancellationToken = default)
 		{
 			var response = await _secrets.GetSecretValueAsync(
 				new GetSecretValueRequest
 				{
 					SecretId = secretName,
-				});
+				},
+				cancellationToken);
 
 			return new ParameterModel()
 			{
@@ -31,7 +32,7 @@ namespace Parameter.Services.Implementations
 			};
 		}
 
-		public async Task<List<ParameterModel>> GetSecretsByPrefixAsync(string prefix)
+		public async Task<List<ParameterModel>> GetSecretsByPrefixAsync(string prefix, CancellationToken cancellationToken = default)
 		{
 			var result = new List<ParameterModel>();
 			var nextToken = null as string;
@@ -48,7 +49,8 @@ namespace Parameter.Services.Implementations
 						}
 					],
 					NextToken = nextToken
-				});
+				},
+				cancellationToken);
 
 				foreach (var secret in response.SecretList
 							 .Where(s => s.Name.StartsWith(prefix))
@@ -58,7 +60,8 @@ namespace Parameter.Services.Implementations
 						new GetSecretValueRequest
 						{
 							SecretId = secret
-						});
+						},
+						cancellationToken);
 
 					result.Add(new ParameterModel()
 					{

@@ -13,14 +13,15 @@ namespace Parameter.Services.Implementations
 	{
 		private readonly AmazonSimpleSystemsManagementClient _ssm = new(creds, region);
 
-		public async Task<ParameterModel> GetParameterAsync(string name, bool withDecryption = true)
+		public async Task<ParameterModel> GetParameterAsync(string name, bool withDecryption = true, CancellationToken cancellationToken = default)
 		{
 			var response = await _ssm.GetParameterAsync(
 				new GetParameterRequest
 				{
 					Name = name,
 					WithDecryption = withDecryption
-				});
+				},
+				cancellationToken);
 
 			return new ParameterModel()
 			{
@@ -30,14 +31,15 @@ namespace Parameter.Services.Implementations
 			};
 		}
 
-		public async Task<List<ParameterModel>> GetParameterByPathAsync(string path, bool withDecryption = true)
+		public async Task<List<ParameterModel>> GetParameterByPathAsync(string path, bool withDecryption = true, CancellationToken cancellationToken = default)
 		{
 			var response = await _ssm.GetParametersByPathAsync(
 				new GetParametersByPathRequest
 				{
 					Path = path,
 					WithDecryption = withDecryption
-				});
+				},
+				cancellationToken);
 
 			return [.. response.Parameters.Select(p => new ParameterModel()
 				{

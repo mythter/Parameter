@@ -4,8 +4,8 @@ namespace Parameter.Services.Interfaces
 {
 	public interface ISecretsService
 	{
-		Task<ParameterModel> GetSecretAsync(string secretName);
+		Task<ParameterModel> GetSecretAsync(string secretName, CancellationToken cancellationToken = default);
 
-		public Task<List<ParameterModel>> GetSecretsByPrefixAsync(string prefix);
+		Task<List<ParameterModel>> GetSecretsByPrefixAsync(string prefix, CancellationToken cancellationToken = default);
 	}
 }
