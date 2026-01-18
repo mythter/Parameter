@@ -135,7 +135,6 @@
 								 Watermark="Region"
 								 MinimumPrefixLength="0"
 								 ToolTip.Tip="{Binding SelectedRegion}"
-								 AutoCompleteBoxProperties.ShowDropdownButton="True"
 								 AutoCompleteBoxProperties.DropdownButtonPosition="Right"
 								 Classes.custom-credentials-selected="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
 
