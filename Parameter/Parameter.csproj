@@ -1,31 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-	<TargetFramework>net10.0</TargetFramework>
-	<Nullable>enable</Nullable>
-	<LangVersion>latest</LangVersion>
-	<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+	</PropertyGroup>
 
-  <ItemGroup>
-	<AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<AvaloniaResource Include="Assets\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-	<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
-	<PackageReference Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
-	<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
-	<PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-	<PackageReference Include="Xaml.Behaviors.Avalonia" Version="$(AvaloniaVersion)" />
-	<PackageReference Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaVersion)" />
-	<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
 
-	<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-	<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
 
-  </ItemGroup>
+		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
 
-  <ItemGroup>
-	<ProjectReference Include="..\Myth.Avalonia\Myth.Avalonia\Myth.Avalonia.csproj" />
-	<ProjectReference Include="..\Parameter.Services\Parameter.Services.csproj" />
-  </ItemGroup>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Myth.Avalonia\Myth.Avalonia\Myth.Avalonia.csproj" />
+		<ProjectReference Include="..\Parameter.Entites\Parameter.Entites.csproj" />
+		<ProjectReference Include="..\Parameter.Services\Parameter.Services.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Models\" />
+	</ItemGroup>
 </Project>

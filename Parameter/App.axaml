@@ -1,13 +1,45 @@
 <Application xmlns="https://github.com/avaloniaui"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:conv="using:Myth.Avalonia.Controls.Converters"
+			 xmlns:mythConv="using:Myth.Avalonia.Controls.Converters"
+			 xmlns:conv="using:Parameter.Converters"
 			 xmlns:themes="using:Myth.Avalonia.Themes"
 			 x:Class="Parameter.App"
 			 RequestedThemeVariant="Dark">
 	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
+	<Application.Resources>
+		<ResourceDictionary>
+
+			<mythConv:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
+			<mythConv:EnumEqualsConverter x:Key="EnumEqualsConverter" />
+			<mythConv:EnumNotEqualsConverter x:Key="EnumNotEqualsConverter" />
+			<conv:PasswordMaskConverter x:Key="PasswordMaskConverter" />
+
+			<FontFamily x:Key="Phosphor">avares://Parameter/Assets/Fonts#Phosphor</FontFamily>
+			<FontFamily x:Key="PhosphorFill">avares://Parameter/Assets/Fonts#Phosphor-Fill</FontFamily>
+
+			<Color x:Key="AccentColor">#6660B2</Color>
+			<!--<Color x:Key="AccentColor">#6660B2</Color>-->
+			<!--<Color x:Key="AccentColor">#585399</Color>-->
+			<!--<Color x:Key="AccentColor">#5C5ADB</Color>-->
+
+			<SolidColorBrush x:Key="PrimaryBackground" Color="#131221" />
+			<SolidColorBrush x:Key="SecondaryBackground" Color="#1F1D36" />
+			<SolidColorBrush x:Key="SecondaryBackgroundLight" Color="#292647" />
+			<SolidColorBrush x:Key="SecondaryBackgroundDark" Color="#181629" />
+			<SolidColorBrush x:Key="SecondaryBackgroundPointerOver" Color="#010917" />
+
+		</ResourceDictionary>
+	</Application.Resources>
+
 	<Application.Styles>
-		<FluentTheme />
+
+		<FluentTheme>
+			<FluentTheme.Palettes>
+				<ColorPaletteResources x:Key="Dark"
+									   Accent="{StaticResource AccentColor}" />
+			</FluentTheme.Palettes>
+		</FluentTheme>
 
 		<themes:MythControls />
 		<themes:MythStyles />
@@ -16,16 +48,4 @@
 
 	</Application.Styles>
 
-	<Application.Resources>
-		<ResourceDictionary>
-
-			<conv:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
-			<conv:EnumEqualsConverter x:Key="EnumEqualsConverter" />
-			<conv:EnumNotEqualsConverter x:Key="EnumNotEqualsConverter" />
-
-			<FontFamily x:Key="Phosphor">avares://Parameter/Assets/Fonts#Phosphor</FontFamily>
-			<FontFamily x:Key="PhosphorFill">avares://Parameter/Assets/Fonts#Phosphor-Fill</FontFamily>
-
-		</ResourceDictionary>
-	</Application.Resources>
 </Application>

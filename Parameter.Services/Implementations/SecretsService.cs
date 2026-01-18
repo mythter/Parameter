@@ -5,20 +5,17 @@ using Amazon.Runtime;
 using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;
 
+using Parameter.Entites.Enums;
+using Parameter.Entites.Models;
 using Parameter.Services.Interfaces;
 
 namespace Parameter.Services.Implementations
 {
-	public class SecretsService : ISecretsService
+	public class SecretsService(AWSCredentials creds, RegionEndpoint region) : ISecretsService
 	{
-		private readonly IAmazonSecretsManager _secrets;
+		private readonly AmazonSecretsManagerClient _secrets = new(creds, region);
 
-		public SecretsService(AWSCredentials creds, RegionEndpoint region)
-		{
-			_secrets = new AmazonSecretsManagerClient(creds, region);
-		}
-
-		public async Task<string> GetSecretAsync(string secretName)
+		public async Task<ParameterModel> GetSecretAsync(string secretName)
 		{
 			var response = await _secrets.GetSecretValueAsync(
 				new GetSecretValueRequest
@@ -26,13 +23,17 @@ namespace Parameter.Services.Implementations
 					SecretId = secretName,
 				});
 
-			return response.SecretString ??
-				   System.Text.Encoding.UTF8.GetString(response.SecretBinary.ToArray());
+			return new ParameterModel()
+			{
+				Name = response.Name,
+				Value = response.SecretString ?? Encoding.UTF8.GetString(response.SecretBinary.ToArray()),
+				Source = SearchSource.SecretsManager,
+			};
 		}
 
-		public async Task<Dictionary<string, string>> GetSecretsByPrefixAsync(string prefix)
+		public async Task<List<ParameterModel>> GetSecretsByPrefixAsync(string prefix)
 		{
-			var result = new Dictionary<string, string>();
+			var result = new List<ParameterModel>();
 			var nextToken = null as string;
 
 			do
@@ -59,9 +60,12 @@ namespace Parameter.Services.Implementations
 							SecretId = secret
 						});
 
-					result[secret] =
-						value.SecretString ??
-						Encoding.UTF8.GetString(value.SecretBinary.ToArray());
+					result.Add(new ParameterModel()
+					{
+						Name = secret,
+						Value = value.SecretString ?? Encoding.UTF8.GetString(value.SecretBinary.ToArray()),
+						Source = SearchSource.SecretsManager,
+					});
 				}
 
 				nextToken = response.NextToken;

@@ -3,55 +3,48 @@ using Amazon.Runtime;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 
+using Parameter.Entites.Enums;
+using Parameter.Entites.Models;
 using Parameter.Services.Interfaces;
 
 namespace Parameter.Services.Implementations
 {
-	public class SsmService : ISsmService
+	public class SsmService(AWSCredentials creds, RegionEndpoint region) : ISsmService
 	{
-		private readonly IAmazonSimpleSystemsManagement _ssm;
+		private readonly AmazonSimpleSystemsManagementClient _ssm = new(creds, region);
 
-		public SsmService(AWSCredentials creds, RegionEndpoint region)
+		public async Task<ParameterModel> GetParameterAsync(string name, bool withDecryption = true)
 		{
-			_ssm = new AmazonSimpleSystemsManagementClient(creds, region);
+			var response = await _ssm.GetParameterAsync(
+				new GetParameterRequest
+				{
+					Name = name,
+					WithDecryption = withDecryption
+				});
+
+			return new ParameterModel()
+			{
+				Name = response.Parameter.Name,
+				Value = response.Parameter.Value,
+				Source = SearchSource.SSMParameterStore
+			};
 		}
 
-		public async Task<string> GetParameterAsync(string name, bool withDecryption = true)
+		public async Task<List<ParameterModel>> GetParameterByPathAsync(string path, bool withDecryption = true)
 		{
-			try
-			{
-				var response = await _ssm.GetParameterAsync(
-						new GetParameterRequest
-						{
-							Name = name,
-							WithDecryption = withDecryption
-						});
-				return response.Parameter.Value;
-			}
-			catch (Exception ex)
-			{
+			var response = await _ssm.GetParametersByPathAsync(
+				new GetParametersByPathRequest
+				{
+					Path = path,
+					WithDecryption = withDecryption
+				});
 
-				throw;
-			}
-		}
-
-		public async Task<List<string>> GetParameterByPathAsync(string path, bool withDecryption = true)
-		{
-			try
-			{
-				var response = await _ssm.GetParametersByPathAsync(
-						new GetParametersByPathRequest
-						{
-							Path = path,
-							WithDecryption = withDecryption
-						});
-				return [.. response.Parameters.Select(p => p.Value)];
-			}
-			catch (Exception ex)
-			{
-
-				throw;
-			}
+			return [.. response.Parameters.Select(p => new ParameterModel()
+				{
+					Name = p.Name,
+					Value = p.Value,
+					Source = SearchSource.SSMParameterStore
+				})];
 		}
 	}
 }

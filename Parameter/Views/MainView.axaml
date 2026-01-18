@@ -8,7 +8,7 @@
 			 xmlns:bh="using:Myth.Avalonia.Controls.Behaviors"
 			 xmlns:amazon="using:Amazon"
 			 mc:Ignorable="d"
-			 d:DesignWidth="400" d:DesignHeight="450"
+			 d:DesignWidth="500" d:DesignHeight="550"
 			 x:Class="Parameter.Views.MainView"
 			 x:DataType="vm:MainViewModel">
 	<Design.DataContext>
@@ -27,12 +27,27 @@
 		</Style>
 	</UserControl.Styles>
 
-	<Border Padding="8">
+	<Border Padding="8"
+			Background="{StaticResource PrimaryBackground}"
+			>
 
 		<Grid RowDefinitions="Auto, 10, Auto, 10, Auto, 10, Auto, 10, *">
 
-			<Expander Grid.Row="0" HorizontalAlignment="Stretch"
-					  IsExpanded="True">
+			<Expander Grid.Row="0"
+					  HorizontalAlignment="Stretch"
+					  IsExpanded="True"
+					  Background="{StaticResource SecondaryBackgroundLight}">
+
+
+				<Expander.Resources>
+
+					<SolidColorBrush x:Key="ExpanderHeaderBackgroundBrush" Color="{StaticResource SecondaryBackgroundColor}" />
+
+					<StaticResource x:Key="ExpanderHeaderBackground" ResourceKey="SecondaryBackground" />
+					<StaticResource x:Key="ExpanderHeaderBackgroundPointerOver" ResourceKey="SecondaryBackgroundDark" />
+					<StaticResource x:Key="ExpanderHeaderBackgroundPressed" ResourceKey="SecondaryBackground" />
+				</Expander.Resources>
+
 				<Expander.Header>
 					<TextBlock Text="AWS Credentials"
 							   FontSize="16"
@@ -65,9 +80,8 @@
 
 							<Button Grid.Row="2"
 									Grid.Column="2"
-									Classes="content-center no-padding"
-									Height="{Binding $parent.Bounds.Height}"
-									Width="{Binding $self.Height}">
+									Classes="square content-center no-padding"
+									Command="{Binding SelectCredentialsFileCommand}">
 								<TextBlock Text="&#xE1FE;"
 										   FontSize="16"
 										   FontFamily="{ StaticResource Phosphor }"/>
@@ -100,7 +114,7 @@
 						  Grid.ColumnSpan="3"
 						  HorizontalAlignment="Stretch"
 						  ItemsSource="{Binding Profiles}"
-						  SelectedItem="{Binding SelectedProfile}"
+						  SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
 						  IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumNotEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
 
 				<TextBlock Grid.Column="0"
@@ -111,6 +125,7 @@
 						   FontSize="14"
 						   IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
 
+				<!-- Regions -->
 				<AutoCompleteBox x:DataType="vm:MainViewModel"
 								 x:Name="RegionBox"
 								 ItemsSource="{Binding Regions}"
@@ -119,6 +134,7 @@
 								 FilterMode="Contains"
 								 Watermark="Region"
 								 MinimumPrefixLength="0"
+								 ToolTip.Tip="{Binding SelectedRegion}"
 								 AutoCompleteBoxProperties.ShowDropdownButton="True"
 								 AutoCompleteBoxProperties.DropdownButtonPosition="Right"
 								 Classes.custom-credentials-selected="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
@@ -152,6 +168,7 @@
 						   Foreground="Gray"
 						   FontSize="14"/>
 
+				<!-- Search Source -->
 				<ComboBox Grid.Column="2"
 						  x:Name="SearchInComboBox"
 						  HorizontalAlignment="Stretch"
@@ -166,24 +183,31 @@
 			</Grid>
 
 			<Grid Grid.Row="6"
-				  ColumnDefinitions="Auto,5,*,5,Auto">
+				  ColumnDefinitions="0.2*,5,*,5,Auto">
 
-				<!-- <AutoCompleteBox Grid.Column="0"
-				Watermark="Prefix"/> -->
-
+				<!-- Prefix -->
 				<AutoCompleteBox Grid.Column="0"
 								 x:DataType="vm:MainViewModel"
 								 x:Name="PrefixBox"
-								 ItemsSource="{Binding Products}"
-								 SelectedItem="{Binding SelectedProduct}"
-								 ValueMemberBinding="{Binding Name}"
+								 ItemsSource="{Binding PrefixHistory}"
+								 Text="{Binding PrefixText}"
 								 FilterMode="Contains"
 								 Watermark="Prefix"
 								 MinimumPrefixLength="0">
 
 					<i:Interaction.Behaviors>
-						<bh:AutoCompletePreserveCaretPositionBehavior/>
+						<bh:AutoCompleteResetCaretPositionBehavior/>
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
+
+						<EventTriggerBehavior EventName="KeyDown">
+							<InvokeCommandAction Command="{Binding PrefixKeyDownCommand}"
+												 PassEventArgsToCommand="True" />
+						</EventTriggerBehavior>
+
+						<EventTriggerBehavior EventName="LostFocus">
+							<InvokeCommandAction Command="{Binding AddToPrefixHistoryCommand}"
+												 CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
+						</EventTriggerBehavior>
 					</i:Interaction.Behaviors>
 
 					<AutoCompleteBox.Styles>
@@ -202,6 +226,7 @@
 				DisplayMemberBinding="{Binding Name}"
 				IsEditable="True"/> -->
 
+				<!-- Parameter -->
 				<AutoCompleteBox Grid.Column="2"
 								 x:DataType="vm:MainViewModel"
 								 x:Name="ParameterBox"
@@ -214,20 +239,16 @@
 
 					<i:Interaction.Behaviors>
 
-
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
 
-						<!-- Enter / подтверждение текста -->
 						<EventTriggerBehavior EventName="KeyDown">
-							<InvokeCommandAction
-							Command="{Binding OnKeyDown}"
-							PassEventArgsToCommand="True" />
+							<InvokeCommandAction Command="{Binding ParameterKeyDownCommand}"
+												 PassEventArgsToCommand="True" />
 						</EventTriggerBehavior>
 
 						<EventTriggerBehavior EventName="LostFocus">
-							<InvokeCommandAction
-							Command="{Binding AddToHistory}"
-							CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
+							<InvokeCommandAction Command="{Binding AddToParameterHistoryCommand}"
+												 CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
 						</EventTriggerBehavior>
 
 					</i:Interaction.Behaviors>
@@ -240,11 +261,10 @@
 
 				</AutoCompleteBox>
 
+				<!-- Search Button -->
 				<Button Grid.Column="4"
-						Command="{Binding SearchParameter}"
-						Classes="content-center no-padding"
-						Height="{Binding $parent.Bounds.Height}"
-						Width="{Binding $self.Height}">
+						Command="{Binding SearchParameterCommand}"
+						Classes="square content-center no-padding">
 					<TextBlock Text="&#xE30C;"
 							   FontSize="16"
 							   FontFamily="{ StaticResource Phosphor }"/>
@@ -252,12 +272,120 @@
 			</Grid>
 
 			<Border Grid.Row="10"
-					CornerRadius="10"
+					CornerRadius="5"
 					ClipToBounds="True">
-				<DataGrid ItemsSource="{Binding People}"
-						  AutoGenerateColumns="True" IsReadOnly="True"
-						  GridLinesVisibility="All"
-						  >
+				<DataGrid  x:Name="ParametersDataGrid"
+						   ItemsSource="{Binding Parameters}"
+						   AutoGenerateColumns="False"
+						   IsReadOnly="True"
+						   GridLinesVisibility="All"
+						   CanUserReorderColumns="True"
+						   CanUserResizeColumns="True">
+
+					<DataGrid.Styles>
+						<Style Selector="DataGridColumnHeader:not(:sortascending):not(:sortdescending) ContentPresenter#PART_ContentPresenter">
+							<Setter Property="Grid.ColumnSpan" Value="2"/>
+						</Style>
+
+						<Style Selector="DataGridColumnHeader">
+							<Setter Property="Background" Value="{StaticResource SecondaryBackground}"/>
+						</Style>
+					</DataGrid.Styles>
+
+					<DataGrid.KeyBindings>
+						<KeyBinding Gesture="Ctrl+C" Command="{Binding CopyCellCommand}"
+									CommandParameter="{Binding #ParametersDataGrid}" />
+					</DataGrid.KeyBindings>
+
+					<DataGrid.Columns>
+
+						<!-- Name -->
+						<DataGridTemplateColumn Header="Name"
+												Width="150"
+												SortMemberPath="Name">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock Text="{Binding Name}"
+											   VerticalAlignment="Center"
+											   TextTrimming="PrefixCharacterEllipsis"
+											   Margin="12,0"
+											   ToolTip.Tip="{Binding Name}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+
+						<!-- Value -->
+						<DataGridTemplateColumn Header="Value"
+												Width="150"
+												SortMemberPath="Value">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock VerticalAlignment="Center"
+											   TextTrimming="CharacterEllipsis"
+											   Margin="12,0"
+											   ToolTip.Tip="{Binding Value}">
+										<TextBlock.Text>
+											<MultiBinding Converter="{StaticResource PasswordMaskConverter}">
+												<Binding Path="Value"/>
+												<Binding Path="Hidden"/>
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+
+						<!-- Hidden -->
+						<DataGridTemplateColumn Header="Hidden"
+												Width="Auto"
+												MinWidth="88">
+
+							<DataGridTemplateColumn.HeaderTemplate>
+								<DataTemplate>
+									<StackPanel Orientation="Horizontal" Spacing="5">
+
+										<StackPanel.Styles>
+											<Style Selector="CheckBox /template/ Border#NormalRectangle">
+												<Setter Property="MaxHeight" Value="15"/>
+												<Setter Property="MaxWidth" Value="15"/>
+											</Style>
+										</StackPanel.Styles>
+
+										<TextBlock Text="Hidden"
+												   HorizontalAlignment="Center"
+												   VerticalAlignment="Center"/>
+
+										<CheckBox IsChecked="{Binding $parent[DataGrid].DataContext.HideAllParameters}"
+												  Classes="center"/>
+									</StackPanel>
+
+								</DataTemplate>
+							</DataGridTemplateColumn.HeaderTemplate>
+
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<CheckBox IsChecked="{Binding Hidden, Mode=TwoWay}"
+											  Classes="center"/>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+
+						<!-- Source -->
+						<DataGridTemplateColumn Header="Source"
+												Width="Auto"
+												SortMemberPath="Source">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock Text="{Binding Source, Converter={StaticResource EnumDescriptionConverter}}"
+											   VerticalAlignment="Center"
+											   TextTrimming="PrefixCharacterEllipsis"
+											   Margin="12,0"
+											   ToolTip.Tip="{Binding Source, Converter={StaticResource EnumDescriptionConverter}}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+
+					</DataGrid.Columns>
 				</DataGrid>
 			</Border>
 

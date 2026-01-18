@@ -1,7 +1,11 @@
-﻿namespace Parameter.Services.Interfaces
+﻿using Parameter.Entites.Models;
+
+namespace Parameter.Services.Interfaces
 {
 	public interface ISecretsService
 	{
-		Task<string> GetSecretAsync(string secretName);
+		Task<ParameterModel> GetSecretAsync(string secretName);
+
+		public Task<List<ParameterModel>> GetSecretsByPrefixAsync(string prefix);
 	}
 }
