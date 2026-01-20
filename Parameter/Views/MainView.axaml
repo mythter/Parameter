@@ -39,11 +39,7 @@
 					  IsExpanded="True"
 					  Background="{StaticResource SecondaryBackgroundLight}">
 
-
 				<Expander.Resources>
-
-					<SolidColorBrush x:Key="ExpanderHeaderBackgroundBrush" Color="{StaticResource SecondaryBackgroundColor}" />
-
 					<StaticResource x:Key="ExpanderHeaderBackground" ResourceKey="SecondaryBackground" />
 					<StaticResource x:Key="ExpanderHeaderBackgroundPointerOver" ResourceKey="SecondaryBackgroundDark" />
 					<StaticResource x:Key="ExpanderHeaderBackgroundPressed" ResourceKey="SecondaryBackground" />
@@ -111,6 +107,18 @@
 				  ColumnDefinitions="Auto,5,*,5,120"
 				  x:Name="ProfileRegionPanel">
 
+				<Grid.Styles>
+					<Style Selector=":is(AutoCompleteBox)#RegionBox.custom-credentials-selected">
+						<Setter Property="HorizontalAlignment" Value="Stretch"/>
+						<Setter Property="Grid.Column" Value="2"/>
+						<Setter Property="Grid.ColumnSpan" Value="3"/>
+					</Style>
+
+					<Style Selector=":is(AutoCompleteBox)#RegionBox">
+						<Setter Property="Grid.Column" Value="4"/>
+					</Style>
+				</Grid.Styles>
+
 				<ComboBox Grid.Column="0"
 						  Grid.ColumnSpan="3"
 						  HorizontalAlignment="Stretch"
@@ -143,7 +151,6 @@
 						<bh:AutoCompleteDropdownButtonBehavior/>
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
 						<bh:AutoCompleteResetCaretPositionBehavior/>
-						<!--<bh:AutoCompletePreserveCaretPositionBehavior/>-->
 					</i:Interaction.Behaviors>
 
 					<AutoCompleteBox.Styles>
@@ -186,7 +193,7 @@
 				  ColumnDefinitions="0.2*,5,*,5,Auto">
 
 				<!-- Prefix -->
-				<AutoCompleteBox Grid.Column="0"
+				<AutoCompleteBox Grid.Column="0"					
 								 x:DataType="vm:MainViewModel"
 								 x:Name="PrefixBox"
 								 ItemsSource="{Binding PrefixHistory}"
@@ -222,11 +229,6 @@
 
 				</AutoCompleteBox>
 
-				<!-- <ComboBox ItemsSource="{Binding Products}"
-				SelectedItem="{Binding SelectedProduct}"
-				DisplayMemberBinding="{Binding Name}"
-				IsEditable="True"/> -->
-
 				<!-- Parameter -->
 				<AutoCompleteBox Grid.Column="2"
 								 x:DataType="vm:MainViewModel"
@@ -259,6 +261,11 @@
 							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
 						</Style>
 					</AutoCompleteBox.Styles>
+
+					<AutoCompleteBox.KeyBindings>
+						<KeyBinding Gesture="Enter"
+									Command="{Binding SearchParameterCommand}"/>
+					</AutoCompleteBox.KeyBindings>
 
 				</AutoCompleteBox>
 
@@ -306,10 +313,10 @@
 					</DataGrid.Styles>
 
 					<DataGrid.KeyBindings>
-						<KeyBinding Gesture="Ctrl+C" Command="{Binding CopyCellCommand}"
+						<KeyBinding Gesture="Ctrl+C"
+									Command="{Binding CopyCellCommand}"
 									CommandParameter="{Binding #ParametersDataGrid}" />
 					</DataGrid.KeyBindings>
-
 					<DataGrid.Columns>
 
 						<!-- Name -->

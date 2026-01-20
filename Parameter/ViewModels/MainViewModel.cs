@@ -56,7 +56,7 @@ public partial class MainViewModel : ViewModelBase
 	private string? _selectedProfile;
 
 	[ObservableProperty]
-	private ICollection<string> _profiles;
+	private ICollection<string> _profiles = [];
 
 	[ObservableProperty]
 	private string? _prefixText;
@@ -109,6 +109,8 @@ public partial class MainViewModel : ViewModelBase
 
 	#endregion
 
+	#region Constructors
+
 	public MainViewModel()
 	{
 		CredentialsFilePath = @"C:\Test\Path\.aws\credentials";
@@ -136,57 +138,11 @@ public partial class MainViewModel : ViewModelBase
 		InitAwsProfiles();
 
 		Parameters.CollectionChanged += OnParametersCollectionChanged;
-
-		Parameters.Add(new ParameterModel { Name = "Param 1", Value = "Value 1", Source = SearchSource.SSMParameterStore });
-		Parameters.Add(new ParameterModel { Name = "Some param", Value = "Some value", Source = SearchSource.SSMParameterStore });
-		Parameters.Add(new ParameterModel { Name = "Secret1", Value = "Secret value", Source = SearchSource.SecretsManager });
-		Parameters.Add(new ParameterModel { Name = "Secret2", Value = "Secret value 2", Source = SearchSource.SecretsManager, Hidden = true });
 	}
 
-	private void InitAwsProfiles()
-	{
-		if (!Design.IsDesignMode)
-		{
-			Profiles = GetAwsProfiles();
-		}
-	}
+	#endregion
 
-	partial void OnSelectedAwsCredentialsLocationChanged(AwsCredentialsStorageLocation value) => InitAwsProfiles();
-
-	partial void OnCredentialsFilePathChanged(string? value) => InitAwsProfiles();
-
-	partial void OnProfilesChanged(ICollection<string> value)
-	{
-		Dispatcher.UIThread.Post(() =>
-		{
-			SelectedProfile = value?.FirstOrDefault();
-		});
-	}
-
-	private void OnParametersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-	{
-		if (e.NewItems is not null)
-		{
-			foreach (ParameterModel item in e.NewItems)
-				item.PropertyChanged += OnParameterPropertyChanged;
-		}
-
-		if (e.OldItems is not null)
-		{
-			foreach (ParameterModel item in e.OldItems)
-				item.PropertyChanged -= OnParameterPropertyChanged;
-		}
-
-		OnPropertyChanged(nameof(HideAllParameters));
-	}
-
-	private void OnParameterPropertyChanged(object? sender, PropertyChangedEventArgs e)
-	{
-		if (e.PropertyName == nameof(ParameterModel.Hidden))
-		{
-			OnPropertyChanged(nameof(HideAllParameters));
-		}
-	}
+	#region Commands
 
 	[RelayCommand]
 	private async Task SelectCredentialsFile()
@@ -253,6 +209,91 @@ public partial class MainViewModel : ViewModelBase
 		if (!string.IsNullOrEmpty(textToCopy) && _platformServices.Clipboard is { } clipboard)
 		{
 			await clipboard.SetTextAsync(textToCopy);
+		}
+	}
+
+	[RelayCommand]
+	private void AddToPrefixHistory(string? text)
+	{
+		if (string.IsNullOrWhiteSpace(text))
+			return;
+
+		MoveToTop(text, PrefixHistory);
+	}
+
+	[RelayCommand]
+	private void AddToParameterHistory(string? text)
+	{
+		if (string.IsNullOrWhiteSpace(text))
+			return;
+
+		MoveToTop(text, ParameterHistory);
+	}
+
+	[RelayCommand]
+	private void PrefixKeyDown(KeyEventArgs? e)
+	{
+		if (e?.Key != Key.Enter)
+			return;
+
+		AddToPrefixHistory(PrefixText);
+	}
+
+	[RelayCommand]
+	private void ParameterKeyDown(KeyEventArgs? e)
+	{
+		if (e?.Key != Key.Enter)
+			return;
+
+		AddToParameterHistory(ParameterText);
+	}
+
+	#endregion
+
+	#region Private Methods
+
+	partial void OnSelectedAwsCredentialsLocationChanged(AwsCredentialsStorageLocation value) => InitAwsProfiles();
+
+	partial void OnCredentialsFilePathChanged(string? value) => InitAwsProfiles();
+
+	partial void OnProfilesChanged(ICollection<string> value)
+	{
+		Dispatcher.UIThread.Post(() =>
+		{
+			SelectedProfile = value?.FirstOrDefault();
+		});
+	}
+
+	private void OnParametersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		if (e.NewItems is not null)
+		{
+			foreach (ParameterModel item in e.NewItems)
+				item.PropertyChanged += OnParameterPropertyChanged;
+		}
+
+		if (e.OldItems is not null)
+		{
+			foreach (ParameterModel item in e.OldItems)
+				item.PropertyChanged -= OnParameterPropertyChanged;
+		}
+
+		OnPropertyChanged(nameof(HideAllParameters));
+	}
+
+	private void OnParameterPropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(ParameterModel.Hidden))
+		{
+			OnPropertyChanged(nameof(HideAllParameters));
+		}
+	}
+
+	private void InitAwsProfiles()
+	{
+		if (!Design.IsDesignMode)
+		{
+			Profiles = GetAwsProfiles();
 		}
 	}
 
@@ -395,42 +436,6 @@ public partial class MainViewModel : ViewModelBase
 		return true;
 	}
 
-	[RelayCommand]
-	private void AddToPrefixHistory(string? text)
-	{
-		if (string.IsNullOrWhiteSpace(text))
-			return;
-
-		MoveToTop(text, PrefixHistory);
-	}
-
-	[RelayCommand]
-	private void AddToParameterHistory(string? text)
-	{
-		if (string.IsNullOrWhiteSpace(text))
-			return;
-
-		MoveToTop(text, ParameterHistory);
-	}
-
-	[RelayCommand]
-	private void PrefixKeyDown(KeyEventArgs? e)
-	{
-		if (e?.Key != Key.Enter)
-			return;
-
-		AddToPrefixHistory(PrefixText);
-	}
-
-	[RelayCommand]
-	private void ParameterKeyDown(KeyEventArgs? e)
-	{
-		if (e?.Key != Key.Enter)
-			return;
-
-		AddToParameterHistory(ParameterText);
-	}
-
 	private static void MoveToTop(string text, IList<string> collection)
 	{
 		Dispatcher.UIThread.Post(() =>
@@ -476,4 +481,6 @@ public partial class MainViewModel : ViewModelBase
 			_ => throw new NotImplementedException()
 		};
 	}
+
+	#endregion
 }
