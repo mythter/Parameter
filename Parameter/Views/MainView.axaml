@@ -5,6 +5,7 @@
 			 xmlns:vm="using:Parameter.ViewModels"
 			 xmlns:enum="using:Parameter.Enums"
 			 xmlns:i="using:Avalonia.Xaml.Interactivity"
+			 xmlns:ap="using:Parameter.AttachedProperties"
 			 xmlns:bh="using:Myth.Avalonia.Controls.Behaviors"
 			 xmlns:amazon="using:Amazon"
 			 mc:Ignorable="d"
@@ -192,6 +193,7 @@
 								 Text="{Binding PrefixText}"
 								 FilterMode="Contains"
 								 Watermark="Prefix"
+								 ap:EnterFocusBehavior.NextFocus="{Binding ElementName=ParameterBox}"
 								 MinimumPrefixLength="0">
 
 					<i:Interaction.Behaviors>
