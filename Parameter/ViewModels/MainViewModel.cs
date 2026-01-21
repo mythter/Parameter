@@ -74,9 +74,12 @@ public partial class MainViewModel : ViewModelBase
 
 	public bool HideAllParameters
 	{
-		get => Parameters is { Count: > 0 } && Parameters.All(p => p.Hidden);
+		get => Parameters is { Count: 0 } && field ||
+			   Parameters is { Count: > 0 } && Parameters.All(p => p.Hidden);
 		set
 		{
+			field = value;
+
 			foreach (var p in Parameters)
 				p.Hidden = value;
 
@@ -194,6 +197,7 @@ public partial class MainViewModel : ViewModelBase
 
 		foreach (var p in parameters)
 		{
+			p.Hidden = HideAllParameters;
 			Parameters.Add(p);
 		}
 	}
