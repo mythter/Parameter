@@ -104,22 +104,30 @@
 			</Expander>
 
 			<Grid Grid.Row="2"
-				  ColumnDefinitions="Auto,5,*,5,120"
+				  ColumnDefinitions="Auto,5,*,5,*,5,120"
 				  x:Name="ProfileRegionPanel">
 
 				<Grid.Styles>
 					<Style Selector=":is(AutoCompleteBox)#RegionBox.custom-credentials-selected">
 						<Setter Property="HorizontalAlignment" Value="Stretch"/>
 						<Setter Property="Grid.Column" Value="2"/>
-						<Setter Property="Grid.ColumnSpan" Value="3"/>
+						<Setter Property="Grid.ColumnSpan" Value="5"/>
 					</Style>
 
 					<Style Selector=":is(AutoCompleteBox)#RegionBox">
-						<Setter Property="Grid.Column" Value="4"/>
+						<Setter Property="Grid.Column" Value="6"/>
 					</Style>
 				</Grid.Styles>
 
-				<ComboBox Grid.Column="0"
+				<!-- Profiles -->
+				<TextBlock Grid.Column="0"
+						   Text="Profile"
+						   VerticalAlignment="Center"
+						   Foreground="Gray"
+						   FontSize="14"
+						   IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumNotEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
+
+				<ComboBox Grid.Column="2"
 						  Grid.ColumnSpan="3"
 						  HorizontalAlignment="Stretch"
 						  ItemsSource="{Binding Profiles}"
