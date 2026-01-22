@@ -33,16 +33,24 @@ public partial class App : Application
 		collection.AddSingleton<IAwsProfilesService, AwsProfilesService>();
 		collection.AddSingleton<IParameterServiceFactory, ParameterServiceFactory>();
 
+		collection.AddSingleton<ISettingsService, SettingsService>();
+
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			desktop.MainWindow = new MainWindow();
-
-			collection.AddSingleton<IDialogService>(new DialogService(desktop.MainWindow));
-			collection.AddSingleton<IPlatformServicesAccessor>(new PlatformServicesAccessor(desktop.MainWindow));
+			collection.AddSingleton<IDialogService>(new DialogService(desktop));
+			collection.AddSingleton<IPlatformServicesAccessor>(new PlatformServicesAccessor(desktop));
 
 			var services = collection.BuildServiceProvider();
 
-			desktop.MainWindow.DataContext = services.GetRequiredService<MainViewModel>();
+			ServiceManager.Initialize(services);
+
+			var settingsService = ServiceManager.GetService<ISettingsService>();
+
+			settingsService.Load();
+
+			desktop.MainWindow = new MainWindow();
+
+			desktop.MainWindow.DataContext = ServiceManager.GetService<MainViewModel>();
 		}
 
 		base.OnFrameworkInitializationCompleted();

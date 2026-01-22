@@ -32,8 +32,4 @@
 		<ProjectReference Include="..\Parameter.Entites\Parameter.Entites.csproj" />
 		<ProjectReference Include="..\Parameter.Services\Parameter.Services.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Models\" />
-	</ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 
-using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 
 using Myth.Avalonia.Controls;
@@ -9,11 +9,14 @@ using Myth.Avalonia.Controls.Enums;
 using Myth.Avalonia.Controls.Options;
 
 using Parameter.Services.Interfaces;
+using Parameter.Views;
 
 namespace Parameter.Services
 {
-	public class DialogService(Window mainWindow) : IDialogService
+	public class DialogService(IClassicDesktopStyleApplicationLifetime applicationLifetime) : IDialogService
 	{
+		private MainWindow MainWindow => (MainWindow)applicationLifetime.MainWindow!;
+
 		public async Task<IStorageFile?> ShowAwsCredentialsFileDialogAsync()
 		{
 			var options = new FilePickerOpenOptions
@@ -22,14 +25,14 @@ namespace Parameter.Services
 				AllowMultiple = false
 			};
 
-			var result = await mainWindow.StorageProvider.OpenFilePickerAsync(options);
+			var result = await MainWindow.StorageProvider.OpenFilePickerAsync(options);
 
 			return result.FirstOrDefault();
 		}
 
 		public Task ShowInfoAsync(string message, string? title = null, bool isTextSelectable = false)
 		{
-			return MessageBox.ShowDialog(mainWindow,
+			return MessageBox.ShowDialog(MainWindow,
 				new MessageBoxOptions()
 				{
 					Title = title ?? "Information",
@@ -41,7 +44,7 @@ namespace Parameter.Services
 
 		public Task ShowWarningAsync(string message, string? title = null, bool isTextSelectable = false)
 		{
-			return MessageBox.ShowDialog(mainWindow,
+			return MessageBox.ShowDialog(MainWindow,
 				new MessageBoxOptions()
 				{
 					Title = title ?? "Warning",
@@ -53,7 +56,7 @@ namespace Parameter.Services
 
 		public Task ShowErrorAsync(string message, string? title = null, bool isTextSelectable = true)
 		{
-			return MessageBox.ShowDialog(mainWindow,
+			return MessageBox.ShowDialog(MainWindow,
 				new MessageBoxOptions()
 				{
 					Title = title ?? "Error occurred",

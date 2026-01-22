@@ -4,7 +4,6 @@
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:Parameter.ViewModels"
 			 xmlns:enum="using:Parameter.Enums"
-			 xmlns:i="using:Avalonia.Xaml.Interactivity"
 			 xmlns:ap="using:Parameter.AttachedProperties"
 			 xmlns:i="using:Avalonia.Xaml.Interactivity"
 			 xmlns:bh="using:Myth.Avalonia.Controls.Behaviors"
@@ -203,7 +202,7 @@
 				  ColumnDefinitions="0.2*,5,*,5,Auto">
 
 				<!-- Prefix -->
-				<AutoCompleteBox Grid.Column="0"					
+				<AutoCompleteBox Grid.Column="0"
 								 x:DataType="vm:MainViewModel"
 								 x:Name="PrefixBox"
 								 ItemsSource="{Binding PrefixHistory}"
@@ -318,15 +317,21 @@
 						</Style>
 					</DataGrid.Styles>
 
+					<i:Interaction.Behaviors>
+						<bhLocal:DataGridStateBehavior />
+					</i:Interaction.Behaviors>
+
 					<DataGrid.KeyBindings>
 						<KeyBinding Gesture="Ctrl+C"
 									Command="{Binding CopyCellCommand}"
 									CommandParameter="{Binding #ParametersDataGrid}" />
 					</DataGrid.KeyBindings>
+
 					<DataGrid.Columns>
 
 						<!-- Name -->
 						<DataGridTemplateColumn Header="Name"
+												Tag="Name"
 												Width="150"
 												SortMemberPath="Name">
 							<DataGridTemplateColumn.CellTemplate>
@@ -342,6 +347,7 @@
 
 						<!-- Value -->
 						<DataGridTemplateColumn Header="Value"
+												Tag="Value"
 												Width="150"
 												SortMemberPath="Value">
 							<DataGridTemplateColumn.CellTemplate>
@@ -363,8 +369,10 @@
 
 						<!-- Hidden -->
 						<DataGridTemplateColumn Header="Hidden"
+												Tag="Hidden"
 												Width="Auto"
-												MinWidth="88">
+												MinWidth="88"
+												CanUserResize="False">
 
 							<DataGridTemplateColumn.HeaderTemplate>
 								<DataTemplate>
@@ -381,7 +389,7 @@
 												   HorizontalAlignment="Center"
 												   VerticalAlignment="Center"/>
 
-										<CheckBox IsChecked="{Binding $parent[DataGrid].DataContext.HideAllParameters}"
+										<CheckBox IsChecked="{Binding $parent[DataGrid].DataContext.HideAllParameters, Mode=TwoWay}"
 												  Classes="center"/>
 									</StackPanel>
 
@@ -398,6 +406,7 @@
 
 						<!-- Source -->
 						<DataGridTemplateColumn Header="Source"
+												Tag="Source"
 												Width="Auto"
 												SortMemberPath="Source">
 							<DataGridTemplateColumn.CellTemplate>

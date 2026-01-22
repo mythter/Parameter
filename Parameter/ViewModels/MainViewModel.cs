@@ -33,6 +33,12 @@ namespace Parameter.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+	#region Private Fields
+
+	private bool _isLoading;
+
+	#endregion
+
 	#region Observables
 
 	[ObservableProperty]
@@ -110,6 +116,8 @@ public partial class MainViewModel : ViewModelBase
 
 	private readonly IPlatformServicesAccessor _platformServices;
 
+	private readonly ISettingsService _settingsService;
+
 	#endregion
 
 	#region Constructors
@@ -130,17 +138,18 @@ public partial class MainViewModel : ViewModelBase
 		IDialogService dialogService,
 		IAwsProfilesService awsProfilesService,
 		IParameterServiceFactory parameterServiceFactory,
-		IPlatformServicesAccessor platformServices)
+		IPlatformServicesAccessor platformServices,
+		ISettingsService settingsService)
 	{
 		_dialogService = dialogService;
 		_awsProfilesService = awsProfilesService;
 		_parameterServiceFactory = parameterServiceFactory;
 		_platformServices = platformServices;
+		_settingsService = settingsService;
 
-		CredentialsFilePath = awsProfilesService.GetDefaultCredentialsPath();
-		InitAwsProfiles();
+		LoadData();
 
-		Parameters.CollectionChanged += OnParametersCollectionChanged;
+		SubscribeToChanges();
 	}
 
 	#endregion
@@ -262,6 +271,8 @@ public partial class MainViewModel : ViewModelBase
 
 	partial void OnProfilesChanged(ICollection<string> value)
 	{
+		if (_isLoading) return;
+
 		Dispatcher.UIThread.Post(() =>
 		{
 			SelectedProfile = value?.FirstOrDefault();
@@ -274,7 +285,7 @@ public partial class MainViewModel : ViewModelBase
 		{
 			foreach (ParameterModel item in e.NewItems)
 				item.PropertyChanged += OnParameterPropertyChanged;
-		}
+			}
 
 		if (e.OldItems is not null)
 		{
@@ -315,7 +326,7 @@ public partial class MainViewModel : ViewModelBase
 			return string.Empty;
 
 		// Value column might be masked
-		if (string.Equals("value", dataGrid.CurrentColumn.Header?.ToString(), StringComparison.OrdinalIgnoreCase))
+		if (string.Equals("value", dataGrid.CurrentColumn.Tag?.ToString(), StringComparison.OrdinalIgnoreCase))
 		{
 			var row = currentCell.FindAncestorOfType<DataGridRow>();
 
@@ -484,6 +495,98 @@ public partial class MainViewModel : ViewModelBase
 			AwsCredentialsStorageLocation.Custom => new BasicAWSCredentials(CustomAccessKey, CustomSecretKey),
 			_ => throw new NotImplementedException()
 		};
+	}
+
+	private void LoadData()
+	{
+		_isLoading = true;
+
+		try
+		{
+
+			HideAllParameters = _settingsService.Settings.Data.HideAllParameters ?? false;
+			SelectedSearchSource = _settingsService.Settings.Data.SelectedSearchSource ?? SearchSource.Everywhere;
+			CredentialsFilePath = _settingsService.Settings.Data.CredentialsFilePath ?? _awsProfilesService.GetDefaultCredentialsPath();
+			SelectedAwsCredentialsLocation = _settingsService.Settings.Data.SelectedAwsCredentialsLocation ?? AwsCredentialsStorageLocation.SharedCredentialsFile;
+
+			Profiles = GetAwsProfiles();
+
+			SelectedProfile = Profiles.FirstOrDefault(p => p == _settingsService.Settings.Data.SelectedAwsProfile) ?? Profiles.FirstOrDefault();
+
+			SelectedRegion = Regions.FirstOrDefault(r => r.SystemName == _settingsService.Settings.Data.SelectedRegion);
+
+			foreach (var prefix in _settingsService.Settings.Data.PrefixHistory)
+			{
+				PrefixHistory.Add(prefix);
+			}
+
+			foreach (var param in _settingsService.Settings.Data.ParameterHistory)
+			{
+				ParameterHistory.Add(param);
+			}
+		}
+		finally
+		{
+			_isLoading = false;
+		}
+	}
+
+	private void SubscribeToChanges()
+	{
+		PropertyChanged += OnPropertyChanged;
+
+		Parameters.CollectionChanged += OnCollectionChanged;
+		Parameters.CollectionChanged += OnParametersCollectionChanged;
+
+		PrefixHistory.CollectionChanged += OnCollectionChanged;
+		ParameterHistory.CollectionChanged += OnCollectionChanged;
+	}
+
+	private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		if (_isLoading) return;
+
+		SaveSettings();
+	}
+
+	private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		if (_isLoading) return;
+
+		var propertiesToSave = new[]
+		{
+			nameof(HideAllParameters),
+			nameof(SelectedSearchSource),
+			nameof(CredentialsFilePath),
+			nameof(SelectedAwsCredentialsLocation),
+			nameof(SelectedProfile),
+			nameof(SelectedRegion),
+			nameof(PrefixText),
+			nameof(ParameterText)
+		};
+
+		if (propertiesToSave.Contains(e.PropertyName))
+		{
+			SaveSettings();
+		}
+	}
+
+	private void SaveSettings()
+	{
+		var settings = _settingsService.Settings.Data;
+
+		settings.HideAllParameters = HideAllParameters;
+		settings.SelectedSearchSource = SelectedSearchSource;
+		settings.CredentialsFilePath = CredentialsFilePath;
+		settings.SelectedAwsCredentialsLocation = SelectedAwsCredentialsLocation;
+
+		settings.SelectedAwsProfile = SelectedProfile;
+		settings.SelectedRegion = SelectedRegion?.SystemName;
+
+		settings.PrefixHistory = [.. PrefixHistory];
+		settings.ParameterHistory = [.. ParameterHistory];
+
+		_settingsService.Save();
 	}
 
 	#endregion
