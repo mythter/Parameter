@@ -6,7 +6,9 @@
 			 xmlns:enum="using:Parameter.Enums"
 			 xmlns:i="using:Avalonia.Xaml.Interactivity"
 			 xmlns:ap="using:Parameter.AttachedProperties"
+			 xmlns:i="using:Avalonia.Xaml.Interactivity"
 			 xmlns:bh="using:Myth.Avalonia.Controls.Behaviors"
+			 xmlns:bhLocal="using:Parameter.Behaviors"
 			 xmlns:amazon="using:Amazon"
 			 mc:Ignorable="d"
 			 d:DesignWidth="500" d:DesignHeight="550"
@@ -250,6 +252,7 @@
 
 					<i:Interaction.Behaviors>
 
+						<bhLocal:AutoCompleteEnterBehavior Command="{Binding SearchParameterCommand}" />
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
 
 						<EventTriggerBehavior EventName="KeyDown">
@@ -269,11 +272,6 @@
 							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
 						</Style>
 					</AutoCompleteBox.Styles>
-
-					<AutoCompleteBox.KeyBindings>
-						<KeyBinding Gesture="Enter"
-									Command="{Binding SearchParameterCommand}"/>
-					</AutoCompleteBox.KeyBindings>
 
 				</AutoCompleteBox>
 
