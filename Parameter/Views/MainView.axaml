@@ -46,7 +46,8 @@
 						Classes="remove-item-button square content-center no-padding"
 						Background="Transparent"
 						Command="{Binding $parent[AutoCompleteBox].(ap:AutoCompleteBoxExtensions.RemoveItemCommand)}"
-						CommandParameter="{Binding}">
+						CommandParameter="{Binding}"
+						Margin="5,0,0,0">
 					<TextBlock Text="&#xE4F6;"
 							   FontSize="16"
 							   FontFamily="{ StaticResource Phosphor }"/>
@@ -100,8 +101,39 @@
 									 Grid.Column="0"
 									 Watermark="Path to the AWS credentials"
 									 IsReadOnly="True"
-									 Focusable="False"
-									 Text="{Binding CredentialsFilePath}" />
+									 Focusable="True"
+									 CaretBrush="Transparent"
+									 Text="{Binding CredentialsFilePath}" >
+								<TextBox.Styles>
+									<Style Selector="TextBox:pointerover">
+										<Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+
+										<Style Selector="^ /template/ Border#PART_BorderElement">
+											<Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+											<Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+										</Style>
+
+										<Style Selector="^ /template/ TextBlock#PART_Watermark">
+											<Setter Property="Foreground" Value="{DynamicResource TextControlPlaceholderForeground}" />
+										</Style>
+									</Style>
+
+									<!-- Focused State -->
+									<Style Selector="TextBox:focus">
+										<Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+
+										<Style Selector="^ /template/ TextBlock#PART_Watermark">
+											<Setter Property="Foreground" Value="{DynamicResource TextControlPlaceholderForeground}" />
+										</Style>
+
+										<Style Selector="^ /template/ Border#PART_BorderElement">
+											<Setter Property="Background" Value="{DynamicResource TextControlBackground}"/>
+											<Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+											<Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+										</Style>
+									</Style>
+								</TextBox.Styles>
+							</TextBox>
 
 							<Button Grid.Row="2"
 									Grid.Column="2"
@@ -439,7 +471,7 @@
 						<!-- Source -->
 						<DataGridTemplateColumn Header="Source"
 												Tag="Source"
-												Width="Auto"
+												Width="100"
 												SortMemberPath="Source">
 							<DataGridTemplateColumn.CellTemplate>
 								<DataTemplate>
