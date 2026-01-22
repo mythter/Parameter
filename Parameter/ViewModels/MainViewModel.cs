@@ -244,6 +244,24 @@ public partial class MainViewModel : ViewModelBase
 	}
 
 	[RelayCommand]
+	private void RemovePrefixFromHistory(string? text)
+	{
+		if (string.IsNullOrWhiteSpace(text))
+			return;
+
+		RemoveFromCollection(text, PrefixHistory);
+	}
+
+	[RelayCommand]
+	private void RemoveParameterFromHistory(string? text)
+	{
+		if (string.IsNullOrWhiteSpace(text))
+			return;
+
+		RemoveFromCollection(text, ParameterHistory);
+	}
+
+	[RelayCommand]
 	private void PrefixKeyDown(KeyEventArgs? e)
 	{
 		if (e?.Key != Key.Enter)
@@ -471,6 +489,13 @@ public partial class MainViewModel : ViewModelBase
 
 			if (index != 0)
 				collection.Insert(0, text);
+		});
+	}
+	private static void RemoveFromCollection(string item, IList<string> collection)
+	{
+		Dispatcher.UIThread.Post(() =>
+		{
+			collection.Remove(item);
 		});
 	}
 
