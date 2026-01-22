@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 
 using Parameter.Entites.Enums;
-using Parameter.Entites.Models;
 using Parameter.Enums;
 
 namespace Parameter.Models
@@ -11,6 +10,8 @@ namespace Parameter.Models
 		public List<string> ParameterHistory { get; set; } = [];
 
 		public List<string> PrefixHistory { get; set; } = [];
+
+		public bool? IsAwsCredentialsExpanded { get; set; }
 
 		public string? CredentialsFilePath { get; set; }
 

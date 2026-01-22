@@ -65,7 +65,7 @@
 
 			<Expander Grid.Row="0"
 					  HorizontalAlignment="Stretch"
-					  IsExpanded="True"
+					  IsExpanded="{Binding IsAwsCredentialsExpanded}"
 					  Background="{StaticResource SecondaryBackgroundLight}">
 
 				<Expander.Resources>

@@ -42,6 +42,9 @@ public partial class MainViewModel : ViewModelBase
 	#region Observables
 
 	[ObservableProperty]
+	private bool _isAwsCredentialsExpanded;
+
+	[ObservableProperty]
 	private string? _credentialsFilePath;
 
 	[ObservableProperty]
@@ -528,7 +531,7 @@ public partial class MainViewModel : ViewModelBase
 
 		try
 		{
-
+			IsAwsCredentialsExpanded = _settingsService.Settings.Data.IsAwsCredentialsExpanded ?? true;
 			HideAllParameters = _settingsService.Settings.Data.HideAllParameters ?? false;
 			SelectedSearchSource = _settingsService.Settings.Data.SelectedSearchSource ?? SearchSource.Everywhere;
 			CredentialsFilePath = _settingsService.Settings.Data.CredentialsFilePath ?? _awsProfilesService.GetDefaultCredentialsPath();
@@ -580,6 +583,7 @@ public partial class MainViewModel : ViewModelBase
 
 		var propertiesToSave = new[]
 		{
+			nameof(IsAwsCredentialsExpanded),
 			nameof(HideAllParameters),
 			nameof(SelectedSearchSource),
 			nameof(CredentialsFilePath),
@@ -600,6 +604,7 @@ public partial class MainViewModel : ViewModelBase
 	{
 		var settings = _settingsService.Settings.Data;
 
+		settings.IsAwsCredentialsExpanded = IsAwsCredentialsExpanded;
 		settings.HideAllParameters = HideAllParameters;
 		settings.SelectedSearchSource = SelectedSearchSource;
 		settings.CredentialsFilePath = CredentialsFilePath;
