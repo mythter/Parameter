@@ -236,12 +236,13 @@
 								 Text="{Binding PrefixText}"
 								 FilterMode="Contains"
 								 Watermark="Prefix"
-								 ap:EnterFocusBehavior.NextFocus="{Binding ElementName=ParameterBox}"
 								 MinimumPrefixLength="0"
 								 ItemTemplate="{StaticResource AutoCompleteBoxRemovableItemTemplate}"
 								 ap:AutoCompleteBoxExtensions.RemoveItemCommand="{Binding RemovePrefixFromHistoryCommand}">
 
 					<i:Interaction.Behaviors>
+
+						<bhLocal:EnterFocusBehavior NextFocus="{Binding #ParameterBox}" />
 						<bh:AutoCompleteResetCaretPositionBehavior/>
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
 
