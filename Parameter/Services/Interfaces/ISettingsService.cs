@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-using Parameter.Models;
+﻿using Parameter.Models;
 
 namespace Parameter.Services.Interfaces
 {
@@ -8,11 +6,7 @@ namespace Parameter.Services.Interfaces
 	{
 		public AppSettings Settings { get; }
 
-		public Task LoadAsync();
-
 		public void Load();
-
-		public Task SaveAsync();
 
 		public void Save();
 	}

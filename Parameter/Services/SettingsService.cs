@@ -27,6 +27,8 @@ namespace Parameter.Services
 
 		private readonly Lock _lock = new();
 
+		private readonly Lock _fileLock = new();
+
 		public AppSettings Settings
 		{
 			get
@@ -39,18 +41,6 @@ namespace Parameter.Services
 			}
 		}
 
-		public async Task LoadAsync()
-		{
-			if (!File.Exists(settingsFilePath))
-			{
-				_currentSettings = new AppSettings();
-				return;
-			}
-
-			var json = await File.ReadAllTextAsync(settingsFilePath);
-			_currentSettings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-		}
-
 		public void Load()
 		{
 			if (!File.Exists(settingsFilePath))
@@ -59,23 +49,14 @@ namespace Parameter.Services
 				return;
 			}
 
-			var json = File.ReadAllText(settingsFilePath);
+			string json;
+
+			lock (_fileLock)
+			{
+				json = File.ReadAllText(settingsFilePath);
+			}
+
 			_currentSettings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-		}
-
-		public async Task SaveAsync()
-		{
-			try
-			{
-				Directory.CreateDirectory(AppDataFolder);
-
-				var json = JsonSerializer.Serialize(Settings, JsonOptions);
-				await File.WriteAllTextAsync(settingsFilePath, json);
-			}
-			catch (Exception ex)
-			{
-				await dialogService.ShowErrorAsync($"Error while saving settings: {ex.Message}");
-			}
 		}
 
 		public void Save()
@@ -85,7 +66,11 @@ namespace Parameter.Services
 				Directory.CreateDirectory(AppDataFolder);
 
 				var json = JsonSerializer.Serialize(Settings, JsonOptions);
-				File.WriteAllText(settingsFilePath, json);
+
+				lock (_fileLock)
+				{
+					File.WriteAllText(settingsFilePath, json);
+				}
 			}
 			catch (Exception ex)
 			{
