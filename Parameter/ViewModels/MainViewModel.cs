@@ -33,6 +33,12 @@ namespace Parameter.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+	#region Constants
+
+	private const int DROPDOWN_HISTORY_MAX_COUNT = 50;
+
+	#endregion
+
 	#region Private Fields
 
 	private bool _isLoading;
@@ -234,7 +240,7 @@ public partial class MainViewModel : ViewModelBase
 		if (string.IsNullOrWhiteSpace(text))
 			return;
 
-		MoveToTop(text, PrefixHistory);
+		MoveToTop(text, PrefixHistory, DROPDOWN_HISTORY_MAX_COUNT);
 	}
 
 	[RelayCommand]
@@ -243,7 +249,7 @@ public partial class MainViewModel : ViewModelBase
 		if (string.IsNullOrWhiteSpace(text))
 			return;
 
-		MoveToTop(text, ParameterHistory);
+		MoveToTop(text, ParameterHistory, DROPDOWN_HISTORY_MAX_COUNT);
 	}
 
 	[RelayCommand]
@@ -472,7 +478,7 @@ public partial class MainViewModel : ViewModelBase
 		return true;
 	}
 
-	private static void MoveToTop(string text, IList<string> collection)
+	private static void MoveToTop(string text, IList<string> collection, int maxCount)
 	{
 		Dispatcher.UIThread.Post(() =>
 		{
@@ -489,6 +495,14 @@ public partial class MainViewModel : ViewModelBase
 
 			if (index > 0)
 				collection.RemoveAt(index);
+
+			if(collection.Count + 1 > maxCount)
+			{
+				for (int i = collection.Count - 1; i >= maxCount -1; i--)
+				{
+					collection.RemoveAt(i);
+				}
+			}
 
 			if (index != 0)
 				collection.Insert(0, text);
