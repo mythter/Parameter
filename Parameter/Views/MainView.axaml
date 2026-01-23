@@ -212,11 +212,10 @@
 								 Watermark="Region"
 								 MinimumPrefixLength="0"
 								 ToolTip.Tip="{Binding SelectedRegion}"
-								 AutoCompleteBoxProperties.DropdownButtonPosition="Right"
 								 Classes.custom-credentials-selected="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
 
 					<i:Interaction.Behaviors>
-						<bh:AutoCompleteDropdownButtonBehavior/>
+						<bh:AutoCompleteDropdownButtonBehavior DropdownButtonPosition="Right"/>
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
 						<bh:AutoCompleteResetCaretPositionBehavior/>
 					</i:Interaction.Behaviors>
