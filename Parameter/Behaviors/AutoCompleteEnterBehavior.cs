@@ -18,6 +18,7 @@ namespace Parameter.Behaviors
 			get => GetValue(CommandProperty);
 			set => SetValue(CommandProperty, value);
 		}
+
 		protected override void OnAttached()
 		{
 			AssociatedObject?.KeyDown += OnKeyDown;
