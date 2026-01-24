@@ -277,15 +277,10 @@
 						<bh:AutoCompleteResetCaretPositionBehavior/>
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
 
-						<EventTriggerBehavior EventName="KeyDown">
-							<InvokeCommandAction Command="{Binding PrefixKeyDownCommand}"
-												 PassEventArgsToCommand="True" />
-						</EventTriggerBehavior>
+						<bhLocal:AutoCompleteKeyDownBehavior Command="{Binding PrefixKeyDownCommand}" />
+						<bhLocal:AutoCompleteLostFocusBehavior Command="{Binding AddToPrefixHistoryCommand}"
+															   CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
 
-						<EventTriggerBehavior EventName="LostFocus">
-							<InvokeCommandAction Command="{Binding AddToPrefixHistoryCommand}"
-												 CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
-						</EventTriggerBehavior>
 					</i:Interaction.Behaviors>
 
 					<AutoCompleteBox.Styles>
@@ -314,18 +309,12 @@
 
 					<i:Interaction.Behaviors>
 
-						<bhLocal:AutoCompleteEnterBehavior Command="{Binding SearchParameterCommand}" />
 						<bh:AutoCompleteZeroMinimumPrefixLengthDropdownBehavior/>
 
-						<EventTriggerBehavior EventName="KeyDown">
-							<InvokeCommandAction Command="{Binding ParameterKeyDownCommand}"
-												 PassEventArgsToCommand="True" />
-						</EventTriggerBehavior>
-
-						<EventTriggerBehavior EventName="LostFocus">
-							<InvokeCommandAction Command="{Binding AddToParameterHistoryCommand}"
-												 CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
-						</EventTriggerBehavior>
+						<bhLocal:AutoCompleteEnterBehavior Command="{Binding SearchParameterCommand}" />
+						<bhLocal:AutoCompleteKeyDownBehavior Command="{Binding ParameterKeyDownCommand}" />
+						<bhLocal:AutoCompleteLostFocusBehavior Command="{Binding AddToParameterHistoryCommand}"
+															   CommandParameter="{Binding $parent[AutoCompleteBox].Text}" />
 
 					</i:Interaction.Behaviors>
 
