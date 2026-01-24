@@ -2,7 +2,7 @@
  <picture>
     <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/43fff10f-9f3a-4c91-8975-1646308d262a">
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/73be9c2c-3be7-4b7e-9767-9fd101c43662">
-    <img src="https://github.com/user-attachments/assets/eba7bbdc-af78-4186-b4aa-c8b353831d8c" alt="Parameter Logo"  height="90">
+    <img src="https://github.com/user-attachments/assets/eba7bbdc-af78-4186-b4aa-c8b353831d8c" alt="Parameter Logo" width="590">
   </picture>
 </div>
 
