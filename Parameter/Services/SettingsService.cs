@@ -17,12 +17,6 @@ namespace Parameter.Services
 
 		private static readonly string settingsFilePath = Path.Combine(AppDataFolder, "settings.json");
 
-		private static readonly JsonSerializerOptions JsonOptions = new()
-		{
-			WriteIndented = true,
-			PropertyNameCaseInsensitive = true
-		};
-
 		private AppSettings? _currentSettings;
 
 		private readonly Lock _lock = new();
@@ -56,7 +50,7 @@ namespace Parameter.Services
 				json = File.ReadAllText(settingsFilePath);
 			}
 
-			_currentSettings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+			_currentSettings = JsonSerializer.Deserialize(json, AppJsonContext.Default.AppSettings) ?? new AppSettings();
 		}
 
 		public void Save()
@@ -65,7 +59,7 @@ namespace Parameter.Services
 			{
 				Directory.CreateDirectory(AppDataFolder);
 
-				var json = JsonSerializer.Serialize(Settings, JsonOptions);
+				var json = JsonSerializer.Serialize(Settings, AppJsonContext.Default.AppSettings);
 
 				lock (_fileLock)
 				{
