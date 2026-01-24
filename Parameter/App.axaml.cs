@@ -20,6 +20,7 @@ public partial class App : Application
 		AvaloniaXamlLoader.Load(this);
 	}
 
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
 	public override void OnFrameworkInitializationCompleted()
 	{
 		// Line below is needed to remove Avalonia data validation.
