@@ -2,7 +2,9 @@
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactivity;
 
 namespace Parameter.Behaviors
@@ -41,6 +43,13 @@ namespace Parameter.Behaviors
 
 		private void OnLostFocus(object? sender, RoutedEventArgs e)
 		{
+			if (TopLevel.GetTopLevel(AssociatedObject) is { } topLevel &&
+				topLevel?.FocusManager?.GetFocusedElement() is Visual visual &&
+				visual?.FindAncestorOfType<PopupRoot>() is not null)
+			{
+				return;
+			}
+
 			var parameter = CommandParameter ?? AssociatedObject?.Text;
 
 			if (Command?.CanExecute(parameter) == true)
