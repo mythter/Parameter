@@ -21,17 +21,19 @@ using Avalonia.VisualTree;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
+using Myth.Avalonia.Services.Abstractions;
+using Myth.Avalonia.Services.Extensions;
 using Parameter.Entites.Enums;
 using Parameter.Entites.Models;
 using Parameter.Enums;
+using Parameter.Helpers;
 using Parameter.Services.Interfaces;
 
 using ResourceNotFoundException = Amazon.SecretsManager.Model.ResourceNotFoundException;
 
 namespace Parameter.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase, IDialogContext
 {
 	#region Constants
 
@@ -117,8 +119,6 @@ public partial class MainViewModel : ViewModelBase
 
 	#region Services
 
-	private readonly IDialogService _dialogService;
-
 	private readonly IAwsProfilesService _awsProfilesService;
 
 	private readonly IParameterServiceFactory _parameterServiceFactory;
@@ -144,13 +144,11 @@ public partial class MainViewModel : ViewModelBase
 	}
 
 	public MainViewModel(
-		IDialogService dialogService,
 		IAwsProfilesService awsProfilesService,
 		IParameterServiceFactory parameterServiceFactory,
 		IPlatformServicesAccessor platformServices,
 		ISettingsService settingsService)
 	{
-		_dialogService = dialogService;
 		_awsProfilesService = awsProfilesService;
 		_parameterServiceFactory = parameterServiceFactory;
 		_platformServices = platformServices;
@@ -168,11 +166,11 @@ public partial class MainViewModel : ViewModelBase
 	[RelayCommand]
 	private async Task SelectCredentialsFile()
 	{
-		var file = await _dialogService.ShowAwsCredentialsFileDialogAsync();
+		var filePath = await this.OpenFileDialogAsync("Choose AWS credentials file");
 
-		if (file is not null)
+		if (filePath is not null)
 		{
-			CredentialsFilePath = file.Path.AbsolutePath;
+			CredentialsFilePath = filePath;
 		}
 	}
 
@@ -373,7 +371,7 @@ public partial class MainViewModel : ViewModelBase
 	{
 		Task ShowErrorMessage(string message, string? title = null)
 			=> showErrorMessage
-				? _dialogService.ShowErrorAsync(message, title)
+				? this.ShowErrorMessageBoxDialog(message, title)
 				: Task.CompletedTask;
 
 		var ssm = _parameterServiceFactory.CreateSsmService(creds, SelectedRegion!);
@@ -415,7 +413,7 @@ public partial class MainViewModel : ViewModelBase
 	{
 		Task ShowErrorMessage(string message, string? title = null)
 			=> showErrorMessage
-				? _dialogService.ShowErrorAsync(message, title)
+				? this.ShowErrorMessageBoxDialog(message, title)
 				: Task.CompletedTask;
 
 		var secrets = _parameterServiceFactory.CreateSecretsService(creds, SelectedRegion!);
@@ -452,26 +450,26 @@ public partial class MainViewModel : ViewModelBase
 		if (SelectedAwsCredentialsLocation == AwsCredentialsStorageLocation.Custom
 			&& (string.IsNullOrWhiteSpace(CustomAccessKey) || string.IsNullOrWhiteSpace(CustomSecretKey)))
 		{
-			await _dialogService.ShowWarningAsync("Both custom access key and secret key must be provided.");
+			await this.ShowWarningMessageBoxDialog("Both custom access key and secret key must be provided.");
 			return false;
 		}
 
 		if ((SelectedAwsCredentialsLocation is AwsCredentialsStorageLocation.SharedCredentialsFile or AwsCredentialsStorageLocation.NetEncryptedStore)
 			&& SelectedProfile is null)
 		{
-			await _dialogService.ShowWarningAsync("Select AWS profile to retrieve parameter for.");
+			await this.ShowWarningMessageBoxDialog("Select AWS profile to retrieve parameter for.");
 			return false;
 		}
 
 		if (SelectedRegion is null)
 		{
-			await _dialogService.ShowWarningAsync("Select AWS region.");
+			await this.ShowWarningMessageBoxDialog("Select AWS region.");
 			return false;
 		}
 
 		if (string.IsNullOrWhiteSpace(ParameterText))
 		{
-			await _dialogService.ShowWarningAsync("Enter valid paramter name or path.");
+			await this.ShowWarningMessageBoxDialog("Enter valid paramter name or path.");
 			return false;
 		}
 
@@ -630,7 +628,14 @@ public partial class MainViewModel : ViewModelBase
 		settings.PrefixHistory = [.. PrefixHistory];
 		settings.ParameterHistory = [.. ParameterHistory];
 
-		_settingsService.Save();
+		try
+		{
+			_settingsService.Save();
+		}
+		catch (Exception ex)
+		{
+			this.ShowErrorMessageBoxDialog($"Error while saving settings: {ex.Message}");
+		}
 	}
 
 	#endregion

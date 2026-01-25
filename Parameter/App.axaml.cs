@@ -38,7 +38,6 @@ public partial class App : Application
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
-			collection.AddSingleton<IDialogService>(new DialogService(desktop));
 			collection.AddSingleton<IPlatformServicesAccessor>(new PlatformServicesAccessor(desktop));
 
 			var services = collection.BuildServiceProvider();

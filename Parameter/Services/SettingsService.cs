@@ -2,20 +2,19 @@
 using System.IO;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Parameter.Models;
 using Parameter.Services.Interfaces;
 
 namespace Parameter.Services
 {
-	public class SettingsService(IDialogService dialogService) : ISettingsService
+	public class SettingsService : ISettingsService
 	{
 		private static readonly string AppDataFolder = Path.Combine(
 			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 			nameof(Parameter));
 
-		private static readonly string settingsFilePath = Path.Combine(AppDataFolder, "settings.json");
+		private static readonly string _settingsFilePath = Path.Combine(AppDataFolder, "settings.json");
 
 		private AppSettings? _currentSettings;
 
@@ -37,7 +36,7 @@ namespace Parameter.Services
 
 		public void Load()
 		{
-			if (!File.Exists(settingsFilePath))
+			if (!File.Exists(_settingsFilePath))
 			{
 				_currentSettings = new AppSettings();
 				return;
@@ -47,7 +46,7 @@ namespace Parameter.Services
 
 			lock (_fileLock)
 			{
-				json = File.ReadAllText(settingsFilePath);
+				json = File.ReadAllText(_settingsFilePath);
 			}
 
 			_currentSettings = JsonSerializer.Deserialize(json, AppJsonContext.Default.AppSettings) ?? new AppSettings();
@@ -55,20 +54,13 @@ namespace Parameter.Services
 
 		public void Save()
 		{
-			try
-			{
-				Directory.CreateDirectory(AppDataFolder);
+			Directory.CreateDirectory(AppDataFolder);
 
-				var json = JsonSerializer.Serialize(Settings, AppJsonContext.Default.AppSettings);
+			var json = JsonSerializer.Serialize(Settings, AppJsonContext.Default.AppSettings);
 
-				lock (_fileLock)
-				{
-					File.WriteAllText(settingsFilePath, json);
-				}
-			}
-			catch (Exception ex)
+			lock (_fileLock)
 			{
-				dialogService.ShowErrorAsync($"Error while saving settings: {ex.Message}").GetAwaiter().GetResult();
+				File.WriteAllText(_settingsFilePath, json);
 			}
 		}
 	}

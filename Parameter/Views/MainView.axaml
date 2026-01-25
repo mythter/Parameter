@@ -8,9 +8,10 @@
 			 xmlns:i="using:Avalonia.Xaml.Interactivity"
 			 xmlns:bh="using:Myth.Avalonia.Controls.Behaviors"
 			 xmlns:bhLocal="using:Parameter.Behaviors"
-			 xmlns:amazon="using:Amazon"
+			 xmlns:ser="using:Myth.Avalonia.Services"
 			 mc:Ignorable="d"
 			 d:DesignWidth="500" d:DesignHeight="550"
+			 ser:DialogManager.Register="{Binding}"
 			 x:Class="Parameter.Views.MainView"
 			 x:DataType="vm:MainViewModel">
 	<Design.DataContext>
