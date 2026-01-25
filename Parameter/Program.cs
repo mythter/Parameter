@@ -2,7 +2,7 @@
 
 using Avalonia;
 
-namespace Parameter.Desktop;
+namespace Parameter;
 
 class Program
 {

@@ -1,9 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
 		<TargetFramework>net10.0</TargetFramework>
-		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+
+		<ApplicationIcon>Assets\Images\logo.ico</ApplicationIcon>
+
 
 		<IsAotCompatible>true</IsAotCompatible>
 		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
@@ -14,10 +20,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Include="Assets\Images\logo.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.1.1" />
 
 		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaVersion)" />
