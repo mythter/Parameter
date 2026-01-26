@@ -44,7 +44,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Myth.Avalonia\Myth.Avalonia\Myth.Avalonia.csproj" />
-		<ProjectReference Include="..\Parameter.Entites\Parameter.Entites.csproj" />
+		<ProjectReference Include="..\Parameter.Entites\Parameter.Entities.csproj" />
 		<ProjectReference Include="..\Parameter.Services\Parameter.Services.csproj" />
 	</ItemGroup>
 </Project>

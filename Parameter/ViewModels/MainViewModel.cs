@@ -21,10 +21,12 @@ using Avalonia.VisualTree;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using Myth.Avalonia.Services.Abstractions;
 using Myth.Avalonia.Services.Extensions;
-using Parameter.Entites.Enums;
-using Parameter.Entites.Models;
+
+using Parameter.Entities.Enums;
+using Parameter.Entities.Models;
 using Parameter.Enums;
 using Parameter.Helpers;
 using Parameter.Services.Interfaces;

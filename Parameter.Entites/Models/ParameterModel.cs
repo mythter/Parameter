@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 
-using Parameter.Entites.Enums;
+using Parameter.Entities.Enums;
 
-namespace Parameter.Entites.Models
+namespace Parameter.Entities.Models
 {
 	public class ParameterModel : INotifyPropertyChanged
 	{

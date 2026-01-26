@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Parameter.Entites\Parameter.Entites.csproj" />
+    <ProjectReference Include="..\Parameter.Entites\Parameter.Entities.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using Parameter.Entites.Models;
+﻿using Parameter.Entities.Models;
 
 namespace Parameter.Services.Interfaces
 {

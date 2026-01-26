@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using Parameter.Entites.Enums;
+using Parameter.Entities.Enums;
 using Parameter.Enums;
 
 namespace Parameter.Models

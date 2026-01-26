@@ -5,7 +5,7 @@
     <Project Path="Myth.Avalonia/Myth.Avalonia.Styles/Myth.Avalonia.Styles.csproj" />
     <Project Path="Myth.Avalonia/Myth.Avalonia/Myth.Avalonia.csproj" />
   </Folder>
-  <Project Path="Parameter.Entites/Parameter.Entites.csproj" Id="9dcbd25a-c36a-423a-8aa8-3cf976f6175e" />
+  <Project Path="Parameter.Entites/Parameter.Entities.csproj" Id="9dcbd25a-c36a-423a-8aa8-3cf976f6175e" />
   <Project Path="Parameter.Services/Parameter.Services.csproj" />
   <Project Path="Parameter/Parameter.csproj" />
 </Solution>

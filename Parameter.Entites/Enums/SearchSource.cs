@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Parameter.Entites.Enums
+namespace Parameter.Entities.Enums
 {
 	public enum SearchSource
 	{

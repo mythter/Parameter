@@ -3,8 +3,8 @@ using Amazon.Runtime;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 
-using Parameter.Entites.Enums;
-using Parameter.Entites.Models;
+using Parameter.Entities.Enums;
+using Parameter.Entities.Models;
 using Parameter.Services.Interfaces;
 
 namespace Parameter.Services.Implementations

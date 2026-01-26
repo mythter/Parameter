@@ -5,8 +5,8 @@ using Amazon.Runtime;
 using Amazon.SecretsManager;
 using Amazon.SecretsManager.Model;
 
-using Parameter.Entites.Enums;
-using Parameter.Entites.Models;
+using Parameter.Entities.Enums;
+using Parameter.Entities.Models;
 using Parameter.Services.Interfaces;
 
 namespace Parameter.Services.Implementations
