@@ -18,9 +18,9 @@ namespace Parameter.Services
 
 		private AppSettings? _currentSettings;
 
-		private readonly Lock _lock = new();
-
 		private readonly Lock _fileLock = new();
+
+		private readonly Lock _lock = new();
 
 		public AppSettings Settings
 		{
