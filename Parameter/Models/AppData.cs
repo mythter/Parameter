@@ -1,28 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 
-using Parameter.Entities.Enums;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using Parameter.Enums;
 
-namespace Parameter.Models
+namespace Parameter.Models;
+
+public partial class AppData : ObservableObject
 {
-	public class AppData
-	{
-		public List<string> ParameterHistory { get; set; } = [];
+	public ObservableCollection<string> ParameterHistory { get; set; } = [];
 
-		public List<string> PrefixHistory { get; set; } = [];
+	public ObservableCollection<string> PrefixHistory { get; set; } = [];
 
-		public bool? IsAwsCredentialsExpanded { get; set; }
+	[ObservableProperty]
+	public partial string? CredentialsFilePath { get; set; }
 
-		public string? CredentialsFilePath { get; set; }
+	[ObservableProperty]
+	public partial string? SelectedAwsProfile { get; set; }
 
-		public string? SelectedAwsProfile { get; set; }
+	[ObservableProperty]
+	public partial AwsCredentialsStorageLocation SelectedAwsCredentialsLocation { get; set; } = AwsCredentialsStorageLocation.SharedCredentialsFile;
 
-		public AwsCredentialsStorageLocation? SelectedAwsCredentialsLocation { get; set; }
+	[ObservableProperty]
+	public partial string? SelectedRegion { get; set; }
 
-		public string? SelectedRegion { get; set; }
+	public SearchSettings SearchSettings { get; set; } = new();
 
-		public bool? HideAllParameters { get; set; }
+	public WindowSettings WindowSettings { get; set; } = new();
 
-		public SearchSource? SelectedSearchSource { get; set; }
-	}
+	public AppSettings AppSettings { get; set; } = new();
 }

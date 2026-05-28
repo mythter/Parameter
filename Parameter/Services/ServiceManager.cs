@@ -1,29 +1,26 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-using Microsoft.Extensions.DependencyInjection;
+namespace Parameter.Services;
 
-namespace Parameter.Services
+public static class ServiceManager
 {
-	public static class ServiceManager
+	private static IServiceProvider? _serviceProvider;
+
+	public static void Initialize(IServiceProvider serviceProvider)
 	{
-		private static IServiceProvider? _serviceProvider;
+		_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+	}
 
-		public static void Initialize(IServiceProvider serviceProvider)
-		{
-			_serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-		}
+	public static T GetService<T>() where T : notnull
+	{
+		if (_serviceProvider == null)
+			throw new InvalidOperationException("ServiceManager is not initialized.");
 
-		public static T GetService<T>() where T : notnull
-		{
-			if (_serviceProvider == null)
-				throw new InvalidOperationException("ServiceManager is not initialized.");
+		return _serviceProvider.GetRequiredService<T>();
+	}
 
-			return _serviceProvider.GetRequiredService<T>();
-		}
-
-		public static T? TryGetService<T>() where T : class
-		{
-			return _serviceProvider?.GetService<T>();
-		}
+	public static T? TryGetService<T>() where T : class
+	{
+		return _serviceProvider?.GetService<T>();
 	}
 }

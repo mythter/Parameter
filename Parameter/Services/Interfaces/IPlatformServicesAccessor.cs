@@ -1,9 +1,8 @@
 ﻿using Avalonia.Input.Platform;
 
-namespace Parameter.Services.Interfaces
+namespace Parameter.Services.Interfaces;
+
+public interface IPlatformServicesAccessor
 {
-	public interface IPlatformServicesAccessor
-	{
-		IClipboard? Clipboard { get; }
-	}
+	IClipboard? Clipboard { get; }
 }

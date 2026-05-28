@@ -7,46 +7,46 @@ using Parameter.Entities.Enums;
 using Parameter.Entities.Models;
 using Parameter.Services.Interfaces;
 
-namespace Parameter.Services.Implementations
+namespace Parameter.Services.Implementations;
+
+public class SsmService(AWSCredentials creds, RegionEndpoint region) : ISsmService
 {
-	public class SsmService(AWSCredentials creds, RegionEndpoint region) : ISsmService
+	private readonly AmazonSimpleSystemsManagementClient _ssm = new(creds, region);
+
+	public async Task<ParameterModel> GetParameterAsync(string name, bool withDecryption = true, CancellationToken cancellationToken = default)
 	{
-		private readonly AmazonSimpleSystemsManagementClient _ssm = new(creds, region);
-
-		public async Task<ParameterModel> GetParameterAsync(string name, bool withDecryption = true, CancellationToken cancellationToken = default)
-		{
-			var response = await _ssm.GetParameterAsync(
-				new GetParameterRequest
-				{
-					Name = name,
-					WithDecryption = withDecryption
-				},
-				cancellationToken);
-
-			return new ParameterModel()
+		var response = await _ssm.GetParameterAsync(
+			new GetParameterRequest
 			{
-				Name = response.Parameter.Name,
-				Value = response.Parameter.Value,
-				Source = SearchSource.SSMParameterStore
-			};
-		}
+				Name = name,
+				WithDecryption = withDecryption
+			},
+			cancellationToken);
 
-		public async Task<List<ParameterModel>> GetParameterByPathAsync(string path, bool withDecryption = true, CancellationToken cancellationToken = default)
+		return new ParameterModel()
 		{
-			var response = await _ssm.GetParametersByPathAsync(
-				new GetParametersByPathRequest
-				{
-					Path = path,
-					WithDecryption = withDecryption
-				},
-				cancellationToken);
+			Name = response.Parameter.Name,
+			Value = response.Parameter.Value,
+			Source = SearchSource.SSMParameterStore
+		};
+	}
 
-			return [.. response.Parameters.Select(p => new ParameterModel()
-				{
-					Name = p.Name,
-					Value = p.Value,
-					Source = SearchSource.SSMParameterStore
-				})];
-		}
+	public async Task<List<ParameterModel>> GetParameterByPathAsync(string path, bool recursive = false, bool withDecryption = true, CancellationToken cancellationToken = default)
+	{
+		var response = await _ssm.GetParametersByPathAsync(
+			new GetParametersByPathRequest
+			{
+				Path = path,
+				Recursive = recursive,
+				WithDecryption = withDecryption
+			},
+			cancellationToken);
+
+		return [.. response.Parameters.Select(p => new ParameterModel()
+			{
+				Name = p.Name,
+				Value = p.Value,
+				Source = SearchSource.SSMParameterStore
+			})];
 	}
 }

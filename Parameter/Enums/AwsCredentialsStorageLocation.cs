@@ -1,16 +1,15 @@
 ﻿using System.ComponentModel;
 
-namespace Parameter.Enums
+namespace Parameter.Enums;
+
+public enum AwsCredentialsStorageLocation
 {
-	public enum AwsCredentialsStorageLocation
-	{
-		[Description("Shared Credentials File")]
-		SharedCredentialsFile,
+	[Description("Shared Credentials File")]
+	SharedCredentialsFile,
 
-		[Description(".NET Encrypted Store")]
-		NetEncryptedStore,
+	[Description(".NET Encrypted Store")]
+	NetEncryptedStore,
 
-		[Description("Custom")]
-		Custom
-	}
+	[Description("Custom")]
+	Custom
 }

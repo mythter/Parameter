@@ -1,9 +1,10 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 
 using Avalonia;
 
 namespace Parameter;
 
+[SuppressMessage("Major Code Smell", "S1118:Utility classes should not have public constructors", Justification = "Entry point class")]
 class Program
 {
 	// Initialization code. Don't use any Avalonia, third-party APIs or any

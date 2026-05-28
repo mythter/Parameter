@@ -2,32 +2,31 @@
 
 using Parameter.Entities.Enums;
 
-namespace Parameter.Entities.Models
+namespace Parameter.Entities.Models;
+
+public class ParameterModel : INotifyPropertyChanged
 {
-	public class ParameterModel : INotifyPropertyChanged
+	public required string Name { get; set; }
+
+	public string? Value { get; set; }
+
+	public SearchSource Source { get; set; }
+
+	public bool Hidden
 	{
-		public required string Name { get; set; }
-
-		public string Value { get; set; }
-
-		public SearchSource Source { get; set; }
-
-		public bool Hidden
+		get;
+		set
 		{
-			get => field;
-			set
+			if (field != value)
 			{
-				if (field != value)
-				{
-					field = value;
-					OnPropertyChanged(nameof(Hidden));
-				}
+				field = value;
+				OnPropertyChanged(nameof(Hidden));
 			}
 		}
-
-		public event PropertyChangedEventHandler? PropertyChanged;
-
-		private void OnPropertyChanged(string propertyName) =>
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
+
+	public event PropertyChangedEventHandler? PropertyChanged;
+
+	private void OnPropertyChanged(string propertyName) =>
+		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

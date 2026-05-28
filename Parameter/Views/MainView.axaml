@@ -66,7 +66,7 @@
 
 			<Expander Grid.Row="0"
 					  HorizontalAlignment="Stretch"
-					  IsExpanded="{Binding IsAwsCredentialsExpanded}"
+					  IsExpanded="{Binding AppSettings.IsAwsCredentialsExpanded}"
 					  Background="{StaticResource SecondaryBackgroundLight}">
 
 				<Expander.Resources>
@@ -86,7 +86,7 @@
 								Spacing="10">
 
 						<ComboBox ItemsSource="{Binding AwsCredentialsStorageLocations}"
-								  SelectedItem="{Binding SelectedAwsCredentialsLocation}"
+								  SelectedItem="{Binding AppData.SelectedAwsCredentialsLocation}"
 								  HorizontalAlignment="Stretch">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
@@ -96,15 +96,15 @@
 						</ComboBox>
 
 						<Grid ColumnDefinitions="*,10,Auto"
-							  IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.SharedCredentialsFile}}">
+							  IsVisible="{Binding AppData.SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.SharedCredentialsFile}}">
 
 							<TextBox Grid.Row="2"
 									 Grid.Column="0"
-									 Watermark="Path to the AWS credentials"
+									 PlaceholderText="Path to the AWS credentials"
 									 IsReadOnly="True"
 									 Focusable="True"
 									 CaretBrush="Transparent"
-									 Text="{Binding CredentialsFilePath}" >
+									 Text="{Binding AppData.CredentialsFilePath}" >
 								<TextBox.Styles>
 									<Style Selector="TextBox:pointerover">
 										<Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
@@ -147,12 +147,12 @@
 						</Grid>
 
 						<StackPanel Spacing="5"
-									IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
+									IsVisible="{Binding AppData.SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
 							<TextBox Text="{Binding CustomAccessKey}"
-									 Watermark="Access Key"/>
+									 PlaceholderText="Access Key"/>
 
 							<TextBox Text="{Binding CustomSecretKey}"
-									 Watermark="Secret Key" PasswordChar="•" />
+									 PlaceholderText="Secret Key" PasswordChar="•" />
 						</StackPanel>
 					</StackPanel>
 				</Expander.Content>
@@ -186,14 +186,14 @@
 						   VerticalAlignment="Center"
 						   Foreground="Gray"
 						   FontSize="14"
-						   IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumNotEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
+						   IsVisible="{Binding AppData.SelectedAwsCredentialsLocation, Converter={StaticResource EnumNotEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
 
 				<ComboBox Grid.Column="2"
 						  Grid.ColumnSpan="3"
 						  HorizontalAlignment="Stretch"
 						  ItemsSource="{Binding Profiles}"
-						  SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
-						  IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumNotEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
+						  SelectedItem="{Binding AppData.SelectedAwsProfile, Mode=TwoWay}"
+						  IsVisible="{Binding AppData.SelectedAwsCredentialsLocation, Converter={StaticResource EnumNotEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
 
 				<TextBlock Grid.Column="0"
 						   x:Name="RegionTextBlock"
@@ -201,7 +201,7 @@
 						   VerticalAlignment="Center"
 						   Foreground="Gray"
 						   FontSize="14"
-						   IsVisible="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
+						   IsVisible="{Binding AppData.SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}"/>
 
 				<!-- Regions -->
 				<AutoCompleteBox x:DataType="vm:MainViewModel"
@@ -210,10 +210,10 @@
 								 SelectedItem="{Binding SelectedRegion}"
 								 ValueMemberBinding="{Binding SystemName}"
 								 FilterMode="Contains"
-								 Watermark="Region"
+								 PlaceholderText="Region"
 								 MinimumPrefixLength="0"
 								 ToolTip.Tip="{Binding SelectedRegion}"
-								 Classes.custom-credentials-selected="{Binding SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
+								 Classes.custom-credentials-selected="{Binding AppData.SelectedAwsCredentialsLocation, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static enum:AwsCredentialsStorageLocation.Custom}}">
 
 					<i:Interaction.Behaviors>
 						<bh:AutoCompleteDropdownButtonBehavior DropdownButtonPosition="Right"/>
@@ -223,7 +223,7 @@
 
 					<AutoCompleteBox.Styles>
 						<Style Selector="AutoCompleteBox#PrefixBox /template/ Popup#PART_Popup">
-							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
+							<Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
 						</Style>
 						<Style Selector="AutoCompleteBox /template/ ListBox /template/ ListBoxItem">
 							<Setter Property="Focusable" Value="False"/>
@@ -248,7 +248,7 @@
 						  x:Name="SearchInComboBox"
 						  HorizontalAlignment="Stretch"
 						  ItemsSource="{Binding SearchSources}"
-						  SelectedItem="{Binding SelectedSearchSource}">
+						  SelectedItem="{Binding SearchSettings.SelectedSearchSource}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
 							<TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
@@ -258,16 +258,16 @@
 			</Grid>
 
 			<Grid Grid.Row="6"
-				  ColumnDefinitions="0.2*,5,*,5,Auto">
+				  ColumnDefinitions="0.2*,5,*,5,Auto,5,Auto">
 
 				<!-- Prefix -->
 				<AutoCompleteBox Grid.Column="0"
 								 x:DataType="vm:MainViewModel"
 								 x:Name="PrefixBox"
-								 ItemsSource="{Binding PrefixHistory}"
+								 ItemsSource="{Binding AppData.PrefixHistory}"
 								 Text="{Binding PrefixText}"
 								 FilterMode="Contains"
-								 Watermark="Prefix"
+								 PlaceholderText="Prefix"
 								 MinimumPrefixLength="0"
 								 ItemTemplate="{StaticResource AutoCompleteBoxRemovableItemTemplate}"
 								 ap:AutoCompleteBoxExtensions.RemoveItemCommand="{Binding RemovePrefixFromHistoryCommand}">
@@ -286,7 +286,7 @@
 
 					<AutoCompleteBox.Styles>
 						<Style Selector="AutoCompleteBox#PrefixBox /template/ Popup#PART_Popup">
-							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
+							<Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
 						</Style>
 						<Style Selector="AutoCompleteBox /template/ ListBox /template/ ListBoxItem">
 							<Setter Property="Focusable" Value="False"/>
@@ -299,10 +299,10 @@
 				<AutoCompleteBox Grid.Column="2"
 								 x:DataType="vm:MainViewModel"
 								 x:Name="ParameterBox"
-								 ItemsSource="{Binding ParameterHistory}"
+								 ItemsSource="{Binding AppData.ParameterHistory}"
 								 Text="{Binding ParameterText}"
 								 FilterMode="Contains"
-								 Watermark="Parameter name"
+								 PlaceholderText="Parameter name"
 								 IsTextCompletionEnabled="False"
 								 MinimumPrefixLength="0"
 								 ItemTemplate="{StaticResource AutoCompleteBoxRemovableItemTemplate}"
@@ -321,14 +321,33 @@
 
 					<AutoCompleteBox.Styles>
 						<Style Selector="AutoCompleteBox#ParameterBox /template/ Popup#PART_Popup">
-							<Setter Property="PlacementMode" Value="BottomEdgeAlignedLeft" />
+							<Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
 						</Style>
 					</AutoCompleteBox.Styles>
 
 				</AutoCompleteBox>
 
-				<!-- Search Button -->
+				<!-- Search Options Button -->
 				<Button Grid.Column="4"
+						Classes="square content-center no-padding">
+					<TextBlock Text="&#xE228;"
+							   FontSize="18"
+							   FontFamily="{ StaticResource Phosphor }"/>
+					
+				<Button.Flyout>
+					<MenuFlyout Placement="BottomEdgeAlignedRight">
+
+						<!-- Recursive Search -->
+						<MenuItem Header="Recursive Search"
+								  ToggleType="CheckBox"
+								  IsChecked="{Binding SearchSettings.RecursiveSearch, Mode=TwoWay}" />
+
+					</MenuFlyout>
+				</Button.Flyout>
+				</Button>
+
+				<!-- Search Button -->
+				<Button Grid.Column="6"
 						Command="{Binding SearchParameterCommand}"
 						IsVisible="{Binding !SearchParameterCommand.IsRunning}"
 						Classes="square content-center no-padding">
@@ -338,7 +357,7 @@
 				</Button>
 
 				<!-- Cancel Search Button -->
-				<Button Grid.Column="4"
+				<Button Grid.Column="6"
 						Command="{Binding SearchParameterCancelCommand}"
 						IsVisible="{Binding SearchParameterCommand.IsRunning}"
 						Classes="square content-center no-padding">

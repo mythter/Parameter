@@ -2,16 +2,16 @@
 
 using Parameter.Models;
 
-namespace Parameter
+namespace Parameter;
+
+[JsonSerializable(typeof(AppData))]
+[JsonSerializable(typeof(AppSettings))]
+[JsonSerializable(typeof(WindowSettings))]
+[JsonSerializable(typeof(SearchSettings))]
+[JsonSerializable(typeof(DataGridSettings))]
+[JsonSourceGenerationOptions(
+	WriteIndented = true,
+	PropertyNameCaseInsensitive = true)]
+public partial class AppJsonContext : JsonSerializerContext
 {
-	[JsonSerializable(typeof(AppSettings))]
-	[JsonSerializable(typeof(AppData))]
-	[JsonSerializable(typeof(WindowSettings))]
-	[JsonSerializable(typeof(DataGridSettings))]
-	[JsonSourceGenerationOptions(
-		WriteIndented = true,
-		PropertyNameCaseInsensitive = true)]
-	public partial class AppJsonContext : JsonSerializerContext
-	{
-	}
 }

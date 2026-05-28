@@ -1,10 +1,10 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using Parameter.Models;
 using Parameter.Services;
 using Parameter.Services.Implementations;
 using Parameter.Services.Interfaces;
@@ -15,18 +15,15 @@ namespace Parameter;
 
 public partial class App : Application
 {
+	private ServiceProvider? _serviceProvider;
+
 	public override void Initialize()
 	{
 		AvaloniaXamlLoader.Load(this);
 	}
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
 	public override void OnFrameworkInitializationCompleted()
 	{
-		// Line below is needed to remove Avalonia data validation.
-		// Without this line you will get duplicate validations from both Avalonia and CT
-		BindingPlugins.DataValidators.RemoveAt(0);
-
 		var collection = new ServiceCollection();
 
 		collection.AddSingleton<MainViewModel>();
@@ -34,25 +31,37 @@ public partial class App : Application
 		collection.AddSingleton<IAwsProfilesService, AwsProfilesService>();
 		collection.AddSingleton<IParameterServiceFactory, ParameterServiceFactory>();
 
-		collection.AddSingleton<ISettingsService, SettingsService>();
+		collection.AddSingleton<IAppDataProvider<AppData>, AppDataProvider>();
+		collection.AddSingleton<IWindowStateService, WindowStateService>();
 
 		if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 		{
 			collection.AddSingleton<IPlatformServicesAccessor>(new PlatformServicesAccessor(desktop));
 
-			var services = collection.BuildServiceProvider();
+			_serviceProvider = collection.BuildServiceProvider();
 
-			ServiceManager.Initialize(services);
+			ServiceManager.Initialize(_serviceProvider);
 
-			var settingsService = ServiceManager.GetService<ISettingsService>();
+			var appDataProvider = ServiceManager.GetService<IAppDataProvider<AppData>>();
 
-			settingsService.Load();
+			appDataProvider.Load();
 
-			desktop.MainWindow = new MainWindow();
-
-			desktop.MainWindow.DataContext = ServiceManager.GetService<MainViewModel>();
+			desktop.MainWindow = new MainWindow(
+				appDataProvider,
+				_serviceProvider.GetRequiredService<IWindowStateService>())
+			{
+				DataContext = ServiceManager.GetService<MainViewModel>()
+			};
 		}
 
 		base.OnFrameworkInitializationCompleted();
+	}
+
+	private void OnDesktopExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+	{
+		// Disposing the ServiceProvider disposes singletons that implement IDisposable
+		// (PortForwardManager — closes all SSH connections; PrivateKeyCache — wipes keys).
+		_serviceProvider?.Dispose();
+		_serviceProvider = null;
 	}
 }

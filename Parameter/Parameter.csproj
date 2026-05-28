@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFramework>$(TargetFramework)</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>false</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -24,19 +23,19 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
-		<PackageReference Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaDataGridVersion)" />
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-		<PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.1.1" />
+		<PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1">
+			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+		</PackageReference>
 
-		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="$(AvaloniaVersion)" />
-		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaVersion)" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Xaml.Behaviors.Avalonia" Version="$(AvaloniaBehaviorsVersion)" />
+		<PackageReference Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaBehaviorsVersion)" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
-
-		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
 
 	</ItemGroup>
 

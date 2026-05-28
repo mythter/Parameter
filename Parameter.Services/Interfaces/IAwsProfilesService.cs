@@ -1,18 +1,16 @@
 ﻿using Amazon.Runtime;
 
-namespace Parameter.Services.Interfaces
+namespace Parameter.Services.Interfaces;
+
+public interface IAwsProfilesService
 {
-	public interface IAwsProfilesService
-	{
-		string GetDefaultCredentialsPath();
+	string GetDefaultCredentialsPath();
 
-		List<string> GetAllSharedProfiles(string? customPath = null);
+	List<string> GetAllSharedProfiles(string? customPath = null);
 
-		List<string> GetAllNetEncryptedProfiles();
+	List<string> GetAllNetEncryptedProfiles();
 
-		public AWSCredentials? GetSharedProfileCredentials(string profileName, string? customPath = null);
+	public AWSCredentials? GetSharedProfileCredentials(string profileName, string? customPath = null);
 
-		public AWSCredentials? GetNetEncryptedCredentials(string profileName);
-
-	}
+	public AWSCredentials? GetNetEncryptedCredentials(string profileName);
 }

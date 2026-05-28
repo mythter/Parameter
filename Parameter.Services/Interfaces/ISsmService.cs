@@ -1,11 +1,17 @@
 ﻿using Parameter.Entities.Models;
 
-namespace Parameter.Services.Interfaces
-{
-	public interface ISsmService
-	{
-		Task<ParameterModel> GetParameterAsync(string name, bool withDecryption = true, CancellationToken cancellationToken = default);
+namespace Parameter.Services.Interfaces;
 
-		Task<List<ParameterModel>> GetParameterByPathAsync(string path, bool withDecryption = true, CancellationToken cancellationToken = default);
-	}
+public interface ISsmService
+{
+	Task<ParameterModel> GetParameterAsync(
+		string name,
+		bool withDecryption = true,
+		CancellationToken cancellationToken = default);
+
+	Task<List<ParameterModel>> GetParameterByPathAsync(
+		string path,
+		bool recursive = false,
+		bool withDecryption = true,
+		CancellationToken cancellationToken = default);
 }

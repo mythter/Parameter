@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Parameter.Models
+namespace Parameter.Models;
+
+public partial class AppSettings : ObservableObject
 {
-	public class AppSettings
-	{
-		public WindowSettings Window { get; set; } = new();
+	public DataGridSettings DataGridSettings { get; set; } = new();
 
-		public Dictionary<string, DataGridSettings> DataGrids { get; set; } = [];
+	[ObservableProperty]
+	public partial bool HideAllParameters { get; set; } = false;
 
-		public AppData Data { get; set; } = new();
-	}
+	[ObservableProperty]
+	public partial bool IsAwsCredentialsExpanded { get; set; } = true;
 }

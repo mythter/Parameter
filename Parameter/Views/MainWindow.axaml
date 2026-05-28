@@ -21,10 +21,6 @@
 		<vm:MainViewModel />
 	</Design.DataContext>
 
-	<i:Interaction.Behaviors>
-		<bh:WindowStateBehavior />
-	</i:Interaction.Behaviors>
-
 	<views:MainView />
 
 </Window>

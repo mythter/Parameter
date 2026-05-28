@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Amazon;
 using Amazon.Runtime;
@@ -16,6 +11,7 @@ using Amazon.SimpleSystemsManagement.Model;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 
@@ -29,6 +25,7 @@ using Parameter.Entities.Enums;
 using Parameter.Entities.Models;
 using Parameter.Enums;
 using Parameter.Helpers;
+using Parameter.Models;
 using Parameter.Services.Interfaces;
 
 using ResourceNotFoundException = Amazon.SecretsManager.Model.ResourceNotFoundException;
@@ -47,49 +44,39 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 	private bool _isLoading;
 
+	private readonly IAppDataProvider<AppData> _appDataProvider;
+
 	#endregion
 
-	#region Observables
+	#region Public Properties
+
+	public AppData AppData => _appDataProvider.Value;
+
+	public SearchSettings SearchSettings => _appDataProvider.Value.SearchSettings;
+
+	public AppSettings AppSettings => _appDataProvider.Value.AppSettings;
 
 	[ObservableProperty]
-	private bool _isAwsCredentialsExpanded;
+	public partial string? CustomAccessKey { get; set; }
 
 	[ObservableProperty]
-	private string? _credentialsFilePath;
+	public partial string? CustomSecretKey { get; set; }
 
 	[ObservableProperty]
-	private string? _customAccessKey;
-
-	[ObservableProperty]
-	private string? _customSecretKey;
-
-	[ObservableProperty]
-	private ParameterModel? _selectedParameter;
-
-	[ObservableProperty]
-	private RegionEndpoint? _selectedRegion;
+	public partial RegionEndpoint? SelectedRegion { get; set; }
 
 	public ObservableCollection<RegionEndpoint> Regions { get; } = new(RegionEndpoint.EnumerableAllRegions);
 
 	[ObservableProperty]
-	private string? _selectedProfile;
+	public partial ICollection<string> Profiles { get; set; } = [];
 
 	[ObservableProperty]
-	private ICollection<string> _profiles = [];
+	public partial string? PrefixText { get; set; }
 
 	[ObservableProperty]
-	private string? _prefixText;
+	public partial string? ParameterText { get; set; }
 
-	public ObservableCollection<string> PrefixHistory { get; set; } = [];
-
-	[ObservableProperty]
-	private string? _parameterText;
-
-	public ObservableCollection<string> ParameterHistory { get; set; } = [];
-
-	[ObservableProperty]
-	[NotifyPropertyChangedFor(nameof(HideAllParameters))]
-	private ObservableCollection<ParameterModel> _parameters = [];
+	public ObservableCollection<ParameterModel> Parameters { get; set; } = [];
 
 	public bool HideAllParameters
 	{
@@ -109,13 +96,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 	public static AwsCredentialsStorageLocation[] AwsCredentialsStorageLocations { get; } = Enum.GetValues<AwsCredentialsStorageLocation>();
 
-	[ObservableProperty]
-	private AwsCredentialsStorageLocation _selectedAwsCredentialsLocation = AwsCredentialsStorageLocation.SharedCredentialsFile;
-
 	public static SearchSource[] SearchSources { get; } = Enum.GetValues<SearchSource>();
-
-	[ObservableProperty]
-	private SearchSource _selectedSearchSource = SearchSource.Everywhere;
 
 	#endregion
 
@@ -127,15 +108,13 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 	private readonly IPlatformServicesAccessor _platformServices;
 
-	private readonly ISettingsService _settingsService;
-
 	#endregion
 
 	#region Constructors
 
 	public MainViewModel()
 	{
-		CredentialsFilePath = @"C:\Test\Path\.aws\credentials";
+		AppData?.CredentialsFilePath = @"C:\Test\Path\.aws\credentials";
 
 		Parameters.CollectionChanged += OnParametersCollectionChanged;
 
@@ -149,12 +128,12 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		IAwsProfilesService awsProfilesService,
 		IParameterServiceFactory parameterServiceFactory,
 		IPlatformServicesAccessor platformServices,
-		ISettingsService settingsService)
+		IAppDataProvider<AppData> appDataProvider)
 	{
 		_awsProfilesService = awsProfilesService;
 		_parameterServiceFactory = parameterServiceFactory;
 		_platformServices = platformServices;
-		_settingsService = settingsService;
+		_appDataProvider = appDataProvider;
 
 		LoadData();
 
@@ -168,11 +147,11 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 	[RelayCommand]
 	private async Task SelectCredentialsFile()
 	{
-		var filePath = await this.OpenFileDialogAsync("Choose AWS credentials file");
+		var filePath = await this.ShowOpenFileDialogAsync("Choose AWS credentials file");
 
 		if (filePath is not null)
 		{
-			CredentialsFilePath = filePath;
+			AppData.CredentialsFilePath = filePath;
 		}
 	}
 
@@ -184,7 +163,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 		Parameters.Clear();
 
-		var creds = GetAwsProfileCredentials(SelectedAwsCredentialsLocation);
+		var creds = GetAwsProfileCredentials(AppData.SelectedAwsCredentialsLocation);
 
 		var parameterPath = PrefixText + ParameterText;
 
@@ -192,11 +171,11 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 		try
 		{
-			if (SelectedSearchSource == SearchSource.SSMParameterStore)
+			if (SearchSettings.SelectedSearchSource == SearchSource.SSMParameterStore)
 			{
 				parameters = await GetSsmParameters(parameterPath, creds!, cancellationToken: cancellationToken);
 			}
-			else if (SelectedSearchSource == SearchSource.SecretsManager)
+			else if (SearchSettings.SelectedSearchSource == SearchSource.SecretsManager)
 			{
 				parameters = await GetSecrets(parameterPath, creds!, cancellationToken: cancellationToken);
 			}
@@ -240,7 +219,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		if (string.IsNullOrWhiteSpace(text))
 			return;
 
-		MoveToTop(text, PrefixHistory, DROPDOWN_HISTORY_MAX_COUNT);
+		MoveToTop(text, AppData.PrefixHistory, DROPDOWN_HISTORY_MAX_COUNT);
 	}
 
 	[RelayCommand]
@@ -249,7 +228,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		if (string.IsNullOrWhiteSpace(text))
 			return;
 
-		MoveToTop(text, ParameterHistory, DROPDOWN_HISTORY_MAX_COUNT);
+		MoveToTop(text, AppData.ParameterHistory, DROPDOWN_HISTORY_MAX_COUNT);
 	}
 
 	[RelayCommand]
@@ -258,7 +237,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		if (string.IsNullOrWhiteSpace(text))
 			return;
 
-		RemoveFromCollection(text, PrefixHistory);
+		RemoveFromCollection(text, AppData.PrefixHistory);
 	}
 
 	[RelayCommand]
@@ -267,7 +246,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		if (string.IsNullOrWhiteSpace(text))
 			return;
 
-		RemoveFromCollection(text, ParameterHistory);
+		RemoveFromCollection(text, AppData.ParameterHistory);
 	}
 
 	[RelayCommand]
@@ -292,18 +271,32 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 	#region Private Methods
 
-	partial void OnSelectedAwsCredentialsLocationChanged(AwsCredentialsStorageLocation value) => InitAwsProfiles();
-
-	partial void OnCredentialsFilePathChanged(string? value) => InitAwsProfiles();
-
 	partial void OnProfilesChanged(ICollection<string> value)
 	{
 		if (_isLoading) return;
 
 		Dispatcher.UIThread.Post(() =>
 		{
-			SelectedProfile = value?.FirstOrDefault();
+			AppData.SelectedAwsProfile = value?.FirstOrDefault();
 		});
+	}
+
+	partial void OnSelectedRegionChanged(RegionEndpoint? value)
+	{
+		AppData.SelectedRegion = value?.SystemName;
+	}
+
+	private void SubscribeToChanges()
+	{
+		Parameters.CollectionChanged += OnParametersCollectionChanged;
+		AppData.PropertyChanged += (s, e) =>
+		{
+			if(e.PropertyName == nameof(AppData.SelectedAwsCredentialsLocation)
+			|| e.PropertyName == nameof(AppData.CredentialsFilePath))
+			{
+				InitAwsProfiles();
+			}
+		};
 	}
 
 	private void OnParametersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -312,7 +305,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		{
 			foreach (ParameterModel item in e.NewItems)
 				item.PropertyChanged += OnParameterPropertyChanged;
-			}
+		}
 
 		if (e.OldItems is not null)
 		{
@@ -339,7 +332,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		}
 	}
 
-	private static string GetCellText(DataGrid dataGrid)
+	private static string? GetCellText(DataGrid dataGrid)
 	{
 		var currentCell = dataGrid
 			.FindDescendantOfType<DataGridRowsPresenter>()?
@@ -386,7 +379,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 		try
 		{
-			var paramsByPath = await ssm.GetParameterByPathAsync(parameterPath, cancellationToken: cancellationToken);
+			var paramsByPath = await ssm.GetParameterByPathAsync(parameterPath, SearchSettings.RecursiveSearch, cancellationToken: cancellationToken);
 
 			if (paramsByPath.Count == 0)
 			{
@@ -449,15 +442,15 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 	private async Task<bool> CanSearchParameter()
 	{
-		if (SelectedAwsCredentialsLocation == AwsCredentialsStorageLocation.Custom
+		if (AppData.SelectedAwsCredentialsLocation == AwsCredentialsStorageLocation.Custom
 			&& (string.IsNullOrWhiteSpace(CustomAccessKey) || string.IsNullOrWhiteSpace(CustomSecretKey)))
 		{
 			await this.ShowWarningMessageBoxDialog("Both custom access key and secret key must be provided.");
 			return false;
 		}
 
-		if ((SelectedAwsCredentialsLocation is AwsCredentialsStorageLocation.SharedCredentialsFile or AwsCredentialsStorageLocation.NetEncryptedStore)
-			&& SelectedProfile is null)
+		if ((AppData.SelectedAwsCredentialsLocation is AwsCredentialsStorageLocation.SharedCredentialsFile or AwsCredentialsStorageLocation.NetEncryptedStore)
+			&& AppData.SelectedAwsProfile is null)
 		{
 			await this.ShowWarningMessageBoxDialog("Select AWS profile to retrieve parameter for.");
 			return false;
@@ -478,7 +471,7 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		return true;
 	}
 
-	private static void MoveToTop(string text, IList<string> collection, int maxCount)
+	private static void MoveToTop(string text, ObservableCollection<string> collection, int maxCount)
 	{
 		Dispatcher.UIThread.Post(() =>
 		{
@@ -496,9 +489,9 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 			if (index > 0)
 				collection.RemoveAt(index);
 
-			if(collection.Count + 1 > maxCount)
+			if (collection.Count + 1 > maxCount)
 			{
-				for (int i = collection.Count - 1; i >= maxCount -1; i--)
+				for (int i = collection.Count - 1; i >= maxCount - 1; i--)
 				{
 					collection.RemoveAt(i);
 				}
@@ -508,7 +501,8 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 				collection.Insert(0, text);
 		});
 	}
-	private static void RemoveFromCollection(string item, IList<string> collection)
+
+	private static void RemoveFromCollection(string item, ObservableCollection<string> collection)
 	{
 		Dispatcher.UIThread.Post(() =>
 		{
@@ -518,9 +512,9 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 	private ObservableCollection<string> GetAwsProfiles()
 	{
-		var profiles = SelectedAwsCredentialsLocation switch
+		var profiles = AppData.SelectedAwsCredentialsLocation switch
 		{
-			AwsCredentialsStorageLocation.SharedCredentialsFile => _awsProfilesService.GetAllSharedProfiles(CredentialsFilePath),
+			AwsCredentialsStorageLocation.SharedCredentialsFile => _awsProfilesService.GetAllSharedProfiles(AppData.CredentialsFilePath),
 			AwsCredentialsStorageLocation.NetEncryptedStore => _awsProfilesService.GetAllNetEncryptedProfiles(),
 			_ => null
 		};
@@ -532,8 +526,8 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 	{
 		return storageLocation switch
 		{
-			AwsCredentialsStorageLocation.SharedCredentialsFile => _awsProfilesService.GetSharedProfileCredentials(SelectedProfile!, CredentialsFilePath),
-			AwsCredentialsStorageLocation.NetEncryptedStore => _awsProfilesService.GetNetEncryptedCredentials(SelectedProfile!),
+			AwsCredentialsStorageLocation.SharedCredentialsFile => _awsProfilesService.GetSharedProfileCredentials(AppData.SelectedAwsProfile!, AppData.CredentialsFilePath),
+			AwsCredentialsStorageLocation.NetEncryptedStore => _awsProfilesService.GetNetEncryptedCredentials(AppData.SelectedAwsProfile!),
 			AwsCredentialsStorageLocation.Custom => new BasicAWSCredentials(CustomAccessKey, CustomSecretKey),
 			_ => throw new NotImplementedException()
 		};
@@ -545,98 +539,16 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 
 		try
 		{
-			IsAwsCredentialsExpanded = _settingsService.Settings.Data.IsAwsCredentialsExpanded ?? true;
-			HideAllParameters = _settingsService.Settings.Data.HideAllParameters ?? false;
-			SelectedSearchSource = _settingsService.Settings.Data.SelectedSearchSource ?? SearchSource.Everywhere;
-			CredentialsFilePath = _settingsService.Settings.Data.CredentialsFilePath ?? _awsProfilesService.GetDefaultCredentialsPath();
-			SelectedAwsCredentialsLocation = _settingsService.Settings.Data.SelectedAwsCredentialsLocation ?? AwsCredentialsStorageLocation.SharedCredentialsFile;
+			AppData.CredentialsFilePath ??= _awsProfilesService.GetDefaultCredentialsPath();
 
 			Profiles = GetAwsProfiles();
+			AppData.SelectedAwsProfile = Profiles.FirstOrDefault(p => p == AppData.SelectedAwsProfile) ?? Profiles.FirstOrDefault();
 
-			SelectedProfile = Profiles.FirstOrDefault(p => p == _settingsService.Settings.Data.SelectedAwsProfile) ?? Profiles.FirstOrDefault();
-
-			SelectedRegion = Regions.FirstOrDefault(r => r.SystemName == _settingsService.Settings.Data.SelectedRegion);
-
-			foreach (var prefix in _settingsService.Settings.Data.PrefixHistory)
-			{
-				PrefixHistory.Add(prefix);
-			}
-
-			foreach (var param in _settingsService.Settings.Data.ParameterHistory)
-			{
-				ParameterHistory.Add(param);
-			}
+			SelectedRegion = Regions.FirstOrDefault(r => r.SystemName == AppData.SelectedRegion);
 		}
 		finally
 		{
 			_isLoading = false;
-		}
-	}
-
-	private void SubscribeToChanges()
-	{
-		PropertyChanged += OnPropertyChanged;
-
-		Parameters.CollectionChanged += OnCollectionChanged;
-		Parameters.CollectionChanged += OnParametersCollectionChanged;
-
-		PrefixHistory.CollectionChanged += OnCollectionChanged;
-		ParameterHistory.CollectionChanged += OnCollectionChanged;
-	}
-
-	private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-	{
-		if (_isLoading) return;
-
-		SaveSettings();
-	}
-
-	private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
-	{
-		if (_isLoading) return;
-
-		var propertiesToSave = new[]
-		{
-			nameof(IsAwsCredentialsExpanded),
-			nameof(HideAllParameters),
-			nameof(SelectedSearchSource),
-			nameof(CredentialsFilePath),
-			nameof(SelectedAwsCredentialsLocation),
-			nameof(SelectedProfile),
-			nameof(SelectedRegion),
-			nameof(PrefixText),
-			nameof(ParameterText)
-		};
-
-		if (propertiesToSave.Contains(e.PropertyName))
-		{
-			SaveSettings();
-		}
-	}
-
-	private void SaveSettings()
-	{
-		var settings = _settingsService.Settings.Data;
-
-		settings.IsAwsCredentialsExpanded = IsAwsCredentialsExpanded;
-		settings.HideAllParameters = HideAllParameters;
-		settings.SelectedSearchSource = SelectedSearchSource;
-		settings.CredentialsFilePath = CredentialsFilePath;
-		settings.SelectedAwsCredentialsLocation = SelectedAwsCredentialsLocation;
-
-		settings.SelectedAwsProfile = SelectedProfile;
-		settings.SelectedRegion = SelectedRegion?.SystemName;
-
-		settings.PrefixHistory = [.. PrefixHistory];
-		settings.ParameterHistory = [.. ParameterHistory];
-
-		try
-		{
-			_settingsService.Save();
-		}
-		catch (Exception ex)
-		{
-			this.ShowErrorMessageBoxDialog($"Error while saving settings: {ex.Message}");
 		}
 	}
 
