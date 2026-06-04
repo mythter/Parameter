@@ -33,20 +33,33 @@ public class SsmService(AWSCredentials creds, RegionEndpoint region) : ISsmServi
 
 	public async Task<List<ParameterModel>> GetParameterByPathAsync(string path, bool recursive = false, bool withDecryption = true, CancellationToken cancellationToken = default)
 	{
-		var response = await _ssm.GetParametersByPathAsync(
-			new GetParametersByPathRequest
-			{
-				Path = path,
-				Recursive = recursive,
-				WithDecryption = withDecryption
-			},
-			cancellationToken);
+		var result = new List<ParameterModel>();
+		var nextToken = null as string;
 
-		return [.. response.Parameters.Select(p => new ParameterModel()
+		do
+		{
+			var response = await _ssm.GetParametersByPathAsync(
+				new GetParametersByPathRequest
+				{
+					Path = path,
+					Recursive = recursive,
+					NextToken = nextToken,
+					WithDecryption = withDecryption
+				},
+				cancellationToken);
+
+			result.AddRange(response.Parameters.Select(p => new ParameterModel()
 			{
 				Name = p.Name,
 				Value = p.Value,
 				Source = SearchSource.SSMParameterStore
-			})];
+			}));
+
+			nextToken = response.NextToken;
+		}
+		while (!string.IsNullOrEmpty(nextToken));
+
+		return result;
+
 	}
 }
