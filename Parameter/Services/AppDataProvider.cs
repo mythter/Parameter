@@ -100,10 +100,10 @@ public class AppDataProvider : IAppDataProvider<AppData>
 		// - Be isolated per user
 		// - Sync in domain roaming profiles (Windows)
 		//
-		// Windows: %APPDATA%\Porter\settings.json (e.g., C:\Users\YourName\AppData\Roaming\Porter)
-		// Linux/macOS: ~/.config/Porter/settings.json
+		// Windows: %APPDATA%\Parameter\settings.json (e.g., C:\Users\YourName\AppData\Roaming\Parameter)
+		// Linux/macOS: ~/.config/Parameter/settings.json
 		var appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-		var appFolder = Path.Combine(appDataFolder, "Porter");
+		var appFolder = Path.Combine(appDataFolder, "Parameter");
 
 		// Ensure the directory exists
 		Directory.CreateDirectory(appFolder);
