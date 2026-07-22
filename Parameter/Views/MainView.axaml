@@ -333,17 +333,17 @@
 					<TextBlock Text="&#xE228;"
 							   FontSize="18"
 							   FontFamily="{ StaticResource Phosphor }"/>
-					
-				<Button.Flyout>
-					<MenuFlyout Placement="BottomEdgeAlignedRight">
 
-						<!-- Recursive Search -->
-						<MenuItem Header="Recursive Search"
-								  ToggleType="CheckBox"
-								  IsChecked="{Binding SearchSettings.RecursiveSearch, Mode=TwoWay}" />
+					<Button.Flyout>
+						<MenuFlyout Placement="BottomEdgeAlignedRight">
 
-					</MenuFlyout>
-				</Button.Flyout>
+							<!-- Recursive Search -->
+							<MenuItem Header="Recursive Search"
+									  ToggleType="CheckBox"
+									  IsChecked="{Binding SearchSettings.RecursiveSearch, Mode=TwoWay}" />
+
+						</MenuFlyout>
+					</Button.Flyout>
 				</Button>
 
 				<!-- Search Button -->
@@ -373,6 +373,7 @@
 					ClipToBounds="True">
 				<DataGrid  x:Name="ParametersDataGrid"
 						   ItemsSource="{Binding Parameters}"
+						   SelectionUnit="Cell"
 						   AutoGenerateColumns="False"
 						   IsReadOnly="True"
 						   GridLinesVisibility="All"
@@ -395,7 +396,7 @@
 
 					<DataGrid.KeyBindings>
 						<KeyBinding Gesture="Ctrl+C"
-									Command="{Binding CopyCellCommand}"
+									Command="{Binding CopyDataGridDataCommand}"
 									CommandParameter="{Binding #ParametersDataGrid}" />
 					</DataGrid.KeyBindings>
 

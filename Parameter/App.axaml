@@ -44,7 +44,7 @@
 		<themes:MythControls />
 		<themes:MythStyles />
 
-		<StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+		<StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.v2.xaml" />
 
 	</Application.Styles>
 

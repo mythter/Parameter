@@ -23,7 +23,7 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
-		<PackageReference Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaDataGridVersion)" />
+		<PackageReference Include="ProDataGrid" Version="$(ProDataGridVersion)" />
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1">

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Text;
 
 using Amazon;
 using Amazon.Runtime;
@@ -9,11 +10,9 @@ using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -200,12 +199,12 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 	}
 
 	[RelayCommand]
-	private async Task CopyCell(DataGrid dataGrid)
+	private async Task CopyDataGridData(DataGrid dataGrid)
 	{
 		if (dataGrid == null)
 			return;
 
-		var textToCopy = GetCellText(dataGrid);
+		var textToCopy = GetTextToCopy(dataGrid);
 
 		if (!string.IsNullOrEmpty(textToCopy) && _platformServices.Clipboard is { } clipboard)
 		{
@@ -332,34 +331,45 @@ public partial class MainViewModel : ViewModelBase, IDialogContext
 		}
 	}
 
-	private static string? GetCellText(DataGrid dataGrid)
+	private static string? GetTextToCopy(DataGrid dataGrid)
 	{
-		var currentCell = dataGrid
-			.FindDescendantOfType<DataGridRowsPresenter>()?
-			.Children.OfType<DataGridRow>()
-			.SelectMany(r => r
-				.FindDescendantOfType<DataGridCellsPresenter>()
-				?.Children.OfType<DataGridCell>() ?? [])
-			.FirstOrDefault(c => c.Classes.Contains(":current"));
+		var rows = dataGrid.SelectedCells.GroupBy(c => c.Item);
 
-		if (currentCell == null)
-			return string.Empty;
+		var sb = new StringBuilder();
 
-		// Value column might be masked
-		if (string.Equals("value", dataGrid.CurrentColumn.Tag?.ToString(), StringComparison.OrdinalIgnoreCase))
+		foreach (var row in rows)
 		{
-			var row = currentCell.FindAncestorOfType<DataGridRow>();
+			bool first = true;
 
-			return row?.DataContext is not ParameterModel parameter
-				? string.Empty
-				: parameter.Value;
+			foreach (var cell in row.OrderBy(c => c.Column.DisplayIndex))
+			{
+				if (!first)
+				{
+					sb.Append('\t');
+				}
+
+
+				if (cell.Item is not ParameterModel parameter)
+					continue;
+
+				var value = cell.Column.Tag?.ToString() switch
+				{
+					"Name" => parameter.Name,
+					"Value" => parameter.Value ?? "",
+					"Source" => parameter.Source.ToString(),
+					"Hidden" => parameter.Hidden.ToString(),
+					_ => ""
+				};
+
+				sb.Append(value);
+
+				first = false;
+			}
+
+			sb.AppendLine();
 		}
 
-		var textBlock = currentCell.GetVisualDescendants()
-			.OfType<TextBlock>()
-			.FirstOrDefault();
-
-		return textBlock?.Text ?? string.Empty;
+		return sb.ToString();
 	}
 
 	private async Task<List<ParameterModel>> GetSsmParameters(string parameterPath, AWSCredentials creds, bool showErrorMessage = true, CancellationToken cancellationToken = default)
